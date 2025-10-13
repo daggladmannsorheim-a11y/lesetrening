@@ -1422,7 +1422,7 @@ let currentTest = null;
 /* ===== Init ===== */
 updateTop(); rebuildResults(); updateDiamondBar();
 const nameInput = $('studentInput'); if(nameInput){ nameInput.value = S.currentStudent || ''; }
-rebuildStudentSelect();
+if (typeof rebuildStudentSelect==='function') rebuildStudentSelect();
 const nameInput = $('studentInput'); if(nameInput){ nameInput.value = S.currentStudent || ''; }
 buildLetterBank();
 buildWordBank('bankDip', DIFTONG_ORD, selectedDip);
