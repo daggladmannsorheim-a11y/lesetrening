@@ -282,6 +282,7 @@
         <label for="studentInput"><b>Elevnavn</b></label>
         <input id="studentInput" type="text" placeholder="F.eks. Adam" style="flex:1;min-width:160px;padding:8px;border:1px solid #e5e7eb;border-radius:8px">
         <button class="btn sec" id="setStudentBtn">Sett navn</button>
+        <select id="studentSelect" title="Tidligere navn" style="min-width:140px;padding:8px;border:1px solid #e5e7eb;border-radius:8px;display:none"></select>
       </div>
       <div class="row">
         <button class="btn sec" id="exportCsvBtn">Eksporter CSV</button>
@@ -291,6 +292,7 @@
       </div>
     </div>
   </div>
+</div>
 </div>
 
 <section class="results">
@@ -1420,6 +1422,8 @@ let currentTest = null;
 /* ===== Init ===== */
 updateTop(); rebuildResults(); updateDiamondBar();
 const nameInput = $('studentInput'); if(nameInput){ nameInput.value = S.currentStudent || ''; }
+rebuildStudentSelect();
+const nameInput = $('studentInput'); if(nameInput){ nameInput.value = S.currentStudent || ''; }
 buildLetterBank();
 buildWordBank('bankDip', DIFTONG_ORD, selectedDip);
 buildWordBank('bankGraf', GRAFEM_ORD, selectedGraf);
@@ -1927,6 +1931,51 @@ function buildSummary(test, m, feilord){
 `Kommentar: Testen ble gjennomført ved at eleven leste teksten høyt. Voksen markerte feil fortløpende og klikket «siste leste» ved stopp. Tallene over kan limes inn i elevens rapport.`
   ].join('\n');
 }
+</script>
+<script>
+// === Elevnavn: nedtrekk og kjapp bytte (tillegg) ===
+(function(){
+  if(typeof S==='undefined') return;
+  function rebuildStudentSelect(){
+    var sel = document.getElementById('studentSelect');
+    if(!sel) return;
+    sel.innerHTML='';
+    var list = (S.students||[]).slice().sort(function(a,b){return a.localeCompare(b,'no');});
+    if(list.length===0){ sel.style.display='none'; return; }
+    sel.style.display='inline-block';
+    var ph = document.createElement('option'); ph.value=''; ph.textContent='Velg elev…'; sel.appendChild(ph);
+    list.forEach(function(n){ var o=document.createElement('option'); o.value=n; o.textContent=n; sel.appendChild(o); });
+    sel.value = S.currentStudent || '';
+  }
+  window.rebuildStudentSelect = rebuildStudentSelect;
+
+  var setBtn = document.getElementById('setStudentBtn');
+  if(setBtn){
+    setBtn.onclick = function(){
+      var v = (document.getElementById('studentInput')?.value||'').trim();
+      S.currentStudent = v;
+      S.students = S.students || [];
+      if(v && !S.students.includes(v)) S.students.push(v);
+      save();
+      rebuildStudentSelect();
+      if(typeof rebuildResults==='function') rebuildResults();
+    };
+  }
+
+  var sel = document.getElementById('studentSelect');
+  if(sel){
+    sel.onchange = function(){
+      var v = sel.value; if(!v) return;
+      S.currentStudent = v; S.students = S.students||[]; if(!S.students.includes(v)) S.students.push(v);
+      save();
+      var inp=document.getElementById('studentInput'); if(inp) inp.value=v;
+      if(typeof rebuildResults==='function') rebuildResults();
+    };
+  }
+
+  // init
+  rebuildStudentSelect();
+})();
 </script>
 </body>
 </html>
