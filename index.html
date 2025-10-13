@@ -1977,5 +1977,101 @@ function buildSummary(test, m, feilord){
   rebuildStudentSelect();
 })();
 </script>
+<script>
+// === Nødreparasjon: bind alle knapper på nytt etter at siden er lastet ===
+(function(){
+  function $(id){ return document.getElementById(id); }
+  function on(id, ev, fn){ var el=$(id); if(el) el.addEventListener(ev, fn, {passive:false}); }
+  function txt(id){ var el=$(id); return el?el.value:''; }
+  function setTxt(id,v){ var el=$(id); if(el) el.value=v; }
+  function safe(fn){ try{ fn(); }catch(e){ /* svelg */ } }
+
+  window.addEventListener('DOMContentLoaded', function(){
+    // Stoppeklokke
+    on('swStart','click', function(){ safe(function(){ $('swStart').onclick && $('swStart').onclick(); }); });
+    on('swStop','click', function(){ safe(function(){ $('swStop').onclick && $('swStop').onclick(); }); });
+    on('swReset','click', function(){ safe(function(){ $('swReset').onclick && $('swReset').onclick(); }); });
+
+    // Nedtelling
+    on('q10','click', function(){ safe(function(){ if(typeof setCountdown==='function') setCountdown(10); }); });
+    on('q30','click', function(){ safe(function(){ if(typeof setCountdown==='function') setCountdown(30); }); });
+    on('q60','click', function(){ safe(function(){ if(typeof setCountdown==='function') setCountdown(60); }); });
+    on('cdStart','click', function(){ safe(function(){ $('cdStart').onclick && $('cdStart').onclick(); }); });
+    on('cdPause','click', function(){ safe(function(){ $('cdPause').onclick && $('cdPause').onclick(); }); });
+    on('cdReset','click', function(){ safe(function(){ $('cdReset').onclick && $('cdReset').onclick(); }); });
+
+    // Tekstforberedelse
+    on('prepareBtn','click', function(){ safe(function(){ $('prepareBtn').onclick && $('prepareBtn').onclick(); }); });
+    on('toggleOrderBtn','click', function(){ safe(function(){ $('toggleOrderBtn').onclick && $('toggleOrderBtn').onclick(); }); });
+
+    // Banker
+    on('selectVowels','click', function(){ safe(function(){ $('selectVowels').onclick && $('selectVowels').onclick(); }); });
+    on('selectConsonants','click', function(){ safe(function(){ $('selectConsonants').onclick && $('selectConsonants').onclick(); }); });
+    on('clearLetters','click', function(){ safe(function(){ $('clearLetters').onclick && $('clearLetters').onclick(); }); });
+    on('genLetters','click', function(){ safe(function(){ $('genLetters').onclick && $('genLetters').onclick(); }); });
+
+    on('selectAllDip','click', function(){ safe(function(){ $('selectAllDip').onclick && $('selectAllDip').onclick(); }); });
+    on('clearAllDip','click', function(){ safe(function(){ $('clearAllDip').onclick && $('clearAllDip').onclick(); }); });
+    on('genDip','click', function(){ safe(function(){ $('genDip').onclick && $('genDip').onclick(); }); });
+
+    on('selectAllGraf','click', function(){ safe(function(){ $('selectAllGraf').onclick && $('selectAllGraf').onclick(); }); });
+    on('clearAllGraf','click', function(){ safe(function(){ $('clearAllGraf').onclick && $('clearAllGraf').onclick(); }); });
+    on('genGraf','click', function(){ safe(function(){ $('genGraf').onclick && $('genGraf').onclick(); }); });
+
+    on('selectAllHF','click', function(){ safe(function(){ $('selectAllHF').onclick && $('selectAllHF').onclick(); }); });
+    on('clearAllHF','click', function(){ safe(function(){ $('clearAllHF').onclick && $('clearAllHF').onclick(); }); });
+    on('genHF','click', function(){ safe(function(){ $('genHF').onclick && $('genHF').onclick(); }); });
+
+    // Test
+    on('loadTestBtn','click', function(){ safe(function(){ $('loadTestBtn').onclick && $('loadTestBtn').onclick(); }); });
+
+    // Omgang
+    on('resetRoundBtn','click', function(){ safe(function(){ $('resetRoundBtn').onclick && $('resetRoundBtn').onclick(); }); });
+    on('finishBtn','click', function(){ safe(function(){ $('finishBtn').onclick && $('finishBtn').onclick(); }); });
+
+    // Data
+    on('exportCsvBtn','click', function(){ safe(function(){ if(typeof exportCSV==='function') exportCSV(); }); });
+    on('clearDataBtn','click', function(){ safe(function(){ $('clearDataBtn').onclick && $('clearDataBtn').onclick(); }); });
+    on('resetAllBtn','click', function(){ safe(function(){ $('resetAllBtn').onclick && $('resetAllBtn').onclick(); }); });
+
+    // Slot & flash
+    on('openSlotBtn','click', function(){ safe(function(){ $('openSlotBtn').onclick && $('openSlotBtn').onclick(); }); });
+    on('slotClose','click', function(){ safe(function(){ $('slotClose').onclick && $('slotClose').onclick(); }); });
+    on('slotSpin','click', function(){ safe(function(){ $('slotSpin').onclick && $('slotSpin').onclick(); }); });
+    on('flashBtn','click', function(){ safe(function(){ $('flashBtn').onclick && $('flashBtn').onclick(); }); });
+
+    // Oppsummering
+    on('closeSummaryBtn','click', function(){ safe(function(){ $('closeSummaryBtn').onclick && $('closeSummaryBtn').onclick(); }); });
+    on('copySummaryBtn','click', function(){ safe(function(){ $('copySummaryBtn').onclick && $('copySummaryBtn').onclick(); }); });
+
+    // Elevnavn
+    on('setStudentBtn','click', function(){
+      safe(function(){
+        if(window.S){
+          var v = txt('studentInput').trim();
+          S.currentStudent = v;
+          S.students = S.students || [];
+          if(v && !S.students.includes(v)) S.students.push(v);
+          if(typeof save==='function') save();
+          if(typeof rebuildStudentSelect==='function') rebuildStudentSelect();
+          if(typeof rebuildResults==='function') rebuildResults();
+        }
+      });
+    });
+    var sel = $('studentSelect');
+    if(sel){ sel.addEventListener('change', function(){
+      safe(function(){
+        if(!window.S) return;
+        var v = sel.value; if(!v) return;
+        S.currentStudent = v;
+        S.students = S.students || []; if(!S.students.includes(v)) S.students.push(v);
+        setTxt('studentInput', v);
+        if(typeof save==='function') save();
+        if(typeof rebuildResults==='function') rebuildResults();
+      });
+    }); }
+  });
+})();
+</script>
 </body>
 </html>
