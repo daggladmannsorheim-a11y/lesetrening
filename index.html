@@ -279,6 +279,11 @@
     <div class="kpi">
       <h3>Data</h3>
       <div class="row">
+        <label for="studentInput"><b>Elevnavn</b></label>
+        <input id="studentInput" type="text" placeholder="F.eks. Adam" style="flex:1;min-width:160px;padding:8px;border:1px solid #e5e7eb;border-radius:8px">
+        <button class="btn sec" id="setStudentBtn">Sett navn</button>
+      </div>
+      <div class="row">
         <button class="btn sec" id="exportCsvBtn">Eksporter CSV</button>
         <button class="btn sec" id="clearDataBtn" title="Sletter kun resultater (ikke ordlister)">Nullstill resultater</button>
         <!-- Endret: full nullstilling -->
@@ -292,7 +297,7 @@
   <h2 style="margin:10px 0">Resultater</h2>
   <table>
     <thead><tr>
-      <th>#</th><th>Dato/tid</th><th>Tid (s)</th><th>Antall</th><th>Feil (/min)</th><th>Korrekte (/min)</th><th>K-OPM</th><th>Poeng</th>
+      <th>#</th><th>Dato/tid</th><th>Elev</th><th>Tid (s)</th><th>Antall</th><th>Feil (/min)</th><th>Korrekte (/min)</th><th>K-OPM</th><th>Poeng</th>
     </tr></thead>
     <tbody id="resultsBody"></tbody>
   </table>
@@ -344,7 +349,7 @@
 const $ = id => document.getElementById(id);
 const fmt = t => { const m=String(Math.floor(t/60)).padStart(2,'0'); const s=String(t%60).padStart(2,'0'); return `${m}:${s}`; };
 const KEY='rl_v11_pro';
-const def={ rounds:[], coins:0, bestWPM:0, diamonds:0, diamondProgress:0, wordBank:[], roundCount:0, prevLastIdx:null, lastMistakes:[], lightning:0, prevSeq:"", savedOriginal:[] };
+const def={ rounds:[], coins:0, bestWPM:0, diamonds:0, diamondProgress:0, wordBank:[], roundCount:0, prevLastIdx:null, lastMistakes:[], lightning:0, prevSeq:"", savedOriginal:[], currentStudent:"", students:[] };
 let S = (()=>{ try{ return JSON.parse(localStorage.getItem(KEY))||{...def}; }catch{ return {...def}; }})();
 function save(){ localStorage.setItem(KEY, JSON.stringify(S)); }
 
@@ -1110,8 +1115,7 @@ glad
 fleste
 374
 slutt
-375
-ene
+375	ene
 376
 mine
 377
@@ -1415,6 +1419,7 @@ let currentTest = null;
 
 /* ===== Init ===== */
 updateTop(); rebuildResults(); updateDiamondBar();
+const nameInput = $('studentInput'); if(nameInput){ nameInput.value = S.currentStudent || ''; }
 buildLetterBank();
 buildWordBank('bankDip', DIFTONG_ORD, selectedDip);
 buildWordBank('bankGraf', GRAFEM_ORD, selectedGraf);
@@ -1693,6 +1698,16 @@ $('cdReset').onclick=()=>{ if(cdRunning){ clearInterval(cdInt); cdRunning=false;
 /* Avslutt omgang */
 $('finishBtn').onclick=()=>{ if(lastIdx==null){ alert('Klikk på siste ord/element først.'); return; } finalize(); };
 
+/* Navnshåndtering */
+$('setStudentBtn').onclick=()=>{
+  const v = $('studentInput').value.trim();
+  S.currentStudent = v;
+  if(v){ S.students = S.students || []; if(!S.students.includes(v)) S.students.push(v); }
+  save();
+  alert(v ? `Navn lagret: ${v}` : 'Navn fjernet.');
+  rebuildResults();
+};
+
 /* CSV & rydde resultater */
 $('exportCsvBtn').onclick=exportCSV;
 $('clearDataBtn').onclick=()=>{ if(confirm('Slette alle resultater? (Poeng/diamantstatus beholdes)')){ S.rounds=[]; save(); rebuildResults(); } };
@@ -1750,7 +1765,7 @@ function finalize(){
 
   // Merk runden
   const modeLabel = currentTest ? `test-${currentTest.type}` : mode;
-  S.rounds.push({ ts:Date.now(), timeSec, total, errors:err, correct:corr, wpm, coins, lastIdx, fpm, cpm, mode: modeLabel });
+  S.rounds.push({ ts:Date.now(), student:(S.currentStudent||''), timeSec, total, errors:err, correct:corr, wpm, coins, lastIdx, fpm, cpm, mode: modeLabel });
   save();
 
   updateTop(); updateDiamondBar(); rebuildResults();
@@ -1807,18 +1822,19 @@ function rebuildResults(){
   const tb=$('resultsBody'); tb.innerHTML='';
   S.rounds.forEach((r,i)=>{
     const tr=document.createElement('tr'); const dt=new Date(r.ts).toLocaleString(undefined,{hour12:false});
-    tr.innerHTML=`<td>${i+1}</td><td>${dt}</td><td>${r.timeSec}</td><td>${r.total}</td><td>${r.errors} (${r.fpm}/min)</td><td>${r.correct} (${r.cpm}/min)</td><td><b>${r.wpm}</b></td><td>${r.coins}</td>`;
+    tr.innerHTML=`<td>${i+1}</td><td>${dt}</td><td>${r.student||''}</td><td>${r.timeSec}</td><td>${r.total}</td><td>${r.errors} (${r.fpm}/min)</td><td>${r.correct} (${r.cpm}/min)</td><td><b>${r.wpm}</b></td><td>${r.coins}</td>`;
     tb.appendChild(tr);
   });
 }
 
 /* CSV-eksport */
 function exportCSV(){
-  const rows = [['#','Dato/tid','Tid (s)','Antall','Feil','Feil/min','Korrekte','K-OPM','Poeng','Modus']];
+  const rows = [['#','Dato/tid','Elev','Tid (s)','Antall','Feil','Feil/min','Korrekte','K-OPM','Poeng','Modus']];
   S.rounds.forEach((r,i)=>{
     rows.push([
       i+1,
       new Date(r.ts).toISOString(),
+      r.student||'',
       r.timeSec,
       r.total,
       r.errors,
