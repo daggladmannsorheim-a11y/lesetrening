@@ -79,8 +79,32 @@
   .modal .card{background:#fff;border-radius:14px;border:1px solid var(--border);min-width:320px;max-width:92vw;padding:18px;box-shadow:0 14px 30px rgba(0,0,0,.25);text-align:center}
   #startOverlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.78);color:#fff;font-size:min(18vw,140px);font-weight:900;z-index:11000}
 
-  #flashcardArea{display:none;background:#fff;padding:18px 16px;border-radius:14px;border:1px solid #e7e7e7;box-shadow:0 6px 18px rgba(0,0,0,.06);text-align:center}
-  #flashcardWord{font-size:clamp(34px,7vw,68px);font-weight:900;min-height:92px;display:flex;align-items:center;justify-content:center}
+  #flashcardArea{
+    display:none;
+    background:#fff;
+    padding:28px 22px;
+    border-radius:18px;
+    border:1px solid #dbe4f0;
+    box-shadow:0 12px 28px rgba(0,0,0,.08);
+    text-align:center
+  }
+  #flashcardProg{font-size:16px;margin-bottom:10px}
+  #flashcardWord{
+    font-size:clamp(64px,12vw,160px);
+    line-height:1.1;
+    font-weight:900;
+    min-height:220px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border:2px solid #dbe4f0;
+    border-radius:18px;
+    background:linear-gradient(180deg,#ffffff,#f8fbff);
+    padding:20px 16px;
+    margin:10px 0 14px;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.7)
+  }
+  #flashcardArea .row .btn{padding:12px 18px;font-size:16px}
 
   .writeWrap{display:grid;grid-template-columns:1.1fr .9fr;gap:12px}
   @media (max-width:840px){ .writeWrap{grid-template-columns:1fr} }
@@ -128,6 +152,7 @@
       <textarea id="inputText" placeholder="Lim inn avsnitt eller tekst…"></textarea>
       <div class="row">
         <label><input type="checkbox" id="scrambleChk"> Bland ord</label>
+        <label><input type="checkbox" id="textFlashChk"> Presenter som flashcards</label>
         <button class="btn pri" id="prepareBtn">Klargjør tekst</button>
         <button class="btn sec hide" id="toggleOrderBtn">Vis original rekkefølge</button>
         <span class="muted">Dobbeltklikk på ord = siste leste.</span>
@@ -144,7 +169,7 @@
       <div id="letterBank" class="bank"></div>
       <div class="row">
         <label>Lengde: <input id="lenLetters" type="number" min="1" max="120" value="120" style="width:70px"></label>
-        <label><input type="checkbox" id="lettersFlashChk"> Presenter som flashcards</label>
+        <label><input type="checkbox" id="lettersFlashChk" checked> Presenter som flashcards</label>
         <button class="btn pri" id="genLetters">Generer</button>
       </div>
     </div>
@@ -158,7 +183,7 @@
       <div id="bankDip" class="bank"></div>
       <div class="row">
         <label>Lengde: <input id="lenDip" type="number" min="1" max="120" value="120" style="width:70px"></label>
-        <label><input type="checkbox" id="dipFlashChk"> Presenter som flashcards</label>
+        <label><input type="checkbox" id="dipFlashChk" checked> Presenter som flashcards</label>
         <button class="btn pri" id="genDip">Generer</button>
       </div>
     </div>
@@ -172,7 +197,7 @@
       <div id="bankGraf" class="bank"></div>
       <div class="row">
         <label>Lengde: <input id="lenGraf" type="number" min="1" max="120" value="120" style="width:70px"></label>
-        <label><input type="checkbox" id="grafFlashChk"> Presenter som flashcards</label>
+        <label><input type="checkbox" id="grafFlashChk" checked> Presenter som flashcards</label>
         <button class="btn pri" id="genGraf">Generer</button>
       </div>
     </div>
@@ -186,7 +211,7 @@
       <div id="bankHF" class="bank"></div>
       <div class="row">
         <label>Lengde: <input id="lenHF" type="number" min="1" max="120" value="120" style="width:70px"></label>
-        <label><input type="checkbox" id="hfFlashChk"> Presenter som flashcards</label>
+        <label><input type="checkbox" id="hfFlashChk" checked> Presenter som flashcards</label>
         <button class="btn pri" id="genHF">Generer</button>
       </div>
     </div>
@@ -207,6 +232,7 @@
             <option value="reisen_til_maanen">Reisen til månen</option>
           </select>
         </label>
+        <label><input type="checkbox" id="testFlashChk"> Presenter som flashcards</label>
       </div>
       <div class="row">
         <button class="btn pri" id="loadTestBtn">Last inn testtekst</button>
@@ -272,7 +298,9 @@
           <button class="btn green" id="flashNextCardBtn">Neste kort</button>
           <button class="btn sec" id="flashExitBtn">Lukk drill</button>
         </div>
-        <div class="muted" style="margin-top:10px">Trykk <b>spacebar</b> eller <b>Neste kort</b> mens nedtellingen går.</div>
+        <div class="muted" style="margin-top:10px;font-size:15px">
+          Trykk <b>spacebar</b> eller <b>Neste kort</b> mens nedtellingen går. Når du avslutter, får du automatisk beskjed om riktige per minutt.
+        </div>
       </div>
       <div class="inline-stats">Totalt: <b id="totalWords">0</b> · Feil: <b id="mistakeCount">0</b> · Korrekte: <b id="correctCount">0</b></div>
       <div id="postRoundBar">
@@ -346,6 +374,7 @@
 </section>
 
 <div id="startOverlay">3</div>
+
 <div id="slotModal" class="modal">
   <div class="card">
     <h3>Spilleautomat</h3>
@@ -401,7 +430,7 @@
   const clamp = (n, min, max) => Math.min(max, Math.max(min, n));
   const unique = arr => Array.from(new Set(arr));
 
-  const STORAGE_KEY = 'rl_stabil_v3';
+  const STORAGE_KEY = 'rl_stabil_v4';
   const defaultState = {
     rounds: [],
     coins: 0,
@@ -832,7 +861,9 @@
     $('flashDrillStartBtn').disabled = false;
     $('flashNextCardBtn').disabled = true;
     $('flashcardArea').focus();
+    $('flashcardArea').scrollIntoView({behavior:'smooth', block:'center'});
     updateCounts();
+    showStatus('Flashcards er klare. Start drill når du vil.', 'ok');
   }
 
   function stopFlashcards(resetState = true){
@@ -1029,7 +1060,7 @@
   }
 
   function getModeLabel(){
-    if(app.ui.currentTest) return `test-${app.ui.currentTest.type}`;
+    if(app.ui.currentTest) return `test-${app.ui.currentTest.type}${app.flashcards.active ? '-flash-drill' : ''}`;
     if(app.flashcards.active) return `${app.ui.flashOriginMode}-flash-drill`;
     return app.ui.mode;
   }
@@ -1116,10 +1147,12 @@
       $('summaryModal').classList.add('active');
     }
 
-    resetAfterFinalize();
+    const modeName = app.flashcards.active ? 'flashcards' : 'vanlig lesing';
+    resetAfterFinalize(false);
+    showStatus(`Ferdig. ${corr} riktige på ${timeSec} sekunder gir ${cpm} riktige per minutt i ${modeName}.`, 'ok');
   }
 
-  function resetAfterFinalize(){
+  function resetAfterFinalize(showSavedMessage = true){
     app.reading.finishedThisRound = false;
     resetReadingMarks();
     updateCounts();
@@ -1128,7 +1161,7 @@
     resetStopwatch();
     resetCountdown();
     stopFlashcards();
-    showStatus('Omgangen er lagret.', 'ok');
+    if(showSavedMessage) showStatus('Omgangen er lagret.', 'ok');
   }
 
   function openMistakeFlashModal(){
@@ -1163,14 +1196,20 @@
     if(!test) return;
     setMode('test');
     const arr = test.tekst.split(/\s+/).filter(Boolean);
-    renderTokens(arr);
     app.reading.savedOriginal = [...arr];
     state.savedOriginal = [...arr];
     persist();
     resetReadingMarks();
     setPostRoundBar(false);
     app.ui.currentTest = { type, key, nivå:test.nivå, tittel:test.tittel };
-    showStatus('Testtekst er lastet inn.', 'ok');
+
+    if($('testFlashChk').checked){
+      startFlashcards(arr);
+      showStatus('Testtekst er lastet inn som flashcards.', 'ok');
+    } else {
+      renderTokens(arr);
+      showStatus('Testtekst er lastet inn.', 'ok');
+    }
   }
 
   function setWriteSeconds(sec){
@@ -1416,14 +1455,20 @@
     app.reading.savedOriginal = [...arr];
     state.savedOriginal = [...arr];
     persist();
-    const rendered = $('scrambleChk').checked ? shuffle(arr) : arr;
-    renderTokens(rendered);
     resetReadingMarks();
     setPostRoundBar(false);
     $('toggleOrderBtn').classList.remove('hide');
     $('toggleOrderBtn').textContent = $('scrambleChk').checked ? 'Vis original rekkefølge' : 'Bland ord';
     app.ui.currentTest = null;
-    showStatus('Teksten er klargjort.', 'ok');
+
+    const rendered = $('scrambleChk').checked ? shuffle(arr) : arr;
+    if($('textFlashChk').checked){
+      startFlashcards(rendered);
+      showStatus('Teksten er klargjort som flashcards.', 'ok');
+    } else {
+      renderTokens(rendered);
+      showStatus('Teksten er klargjort.', 'ok');
+    }
   }
 
   function toggleOriginalOrder(){
@@ -1447,7 +1492,11 @@
   function maybeGenerateFromBank(selectedSet, len, flashCheckboxId){
     const list = randomItemsFromSet(selectedSet, len);
     if(!list) return;
-    renderSequence(list, { flash: $(flashCheckboxId).checked });
+    if($(flashCheckboxId).checked){
+      startFlashcards(list);
+    } else {
+      renderSequence(list, { flash:false });
+    }
   }
 
   function copySummary(){
