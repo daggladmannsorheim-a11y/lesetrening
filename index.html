@@ -5,7 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Lesetrening</title>
 <style>
-  :root{ --blue:#1e88e5;--green:#22c55e;--red:#ef4444;--gold:#f59e0b;--bg:#f5f7fb;--card:#ffffff;--muted:#6b7280;--purple:#7c3aed; }
+  :root{
+    --blue:#1e88e5;--green:#22c55e;--red:#ef4444;--gold:#f59e0b;--bg:#f5f7fb;--card:#ffffff;--muted:#6b7280;--purple:#7c3aed;
+    --border:#e5e7eb;--soft:#eef2f7;--okbg:#ecfdf5;--warnbg:#fff7ed;
+  }
   *{box-sizing:border-box}
   body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;background:var(--bg);color:#111}
   header{background:linear-gradient(135deg,#1e88e5,#60a5fa);color:#fff;padding:18px 16px}
@@ -16,84 +19,80 @@
 
   .main{display:grid;grid-template-columns:2fr 1fr;gap:18px;max-width:1280px;margin:18px auto;padding:0 16px}
   @media (max-width:980px){ .main{grid-template-columns:1fr} }
-  .panel{background:var(--card);border:1px solid #e5e7eb;border-radius:14px;box-shadow:0 8px 22px rgba(0,0,0,.05)}
-  .panel .hd{padding:12px 14px;border-bottom:1px solid #eef2f7;display:flex;gap:8px;align-items:flex-start;flex-wrap:wrap}
-  .panel .bd{padding:14px}
+  .panel,.kpi{background:var(--card);border:1px solid var(--border);border-radius:14px;box-shadow:0 8px 22px rgba(0,0,0,.05)}
+  .panel .hd{padding:12px 14px;border-bottom:1px solid var(--soft);display:flex;gap:8px;align-items:flex-start;flex-wrap:wrap}
+  .panel .bd,.kpi{padding:14px}
 
-  .mode{display:inline-flex;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;flex-wrap:wrap}
+  .mode{display:inline-flex;border:1px solid var(--border);border-radius:10px;overflow:hidden;flex-wrap:wrap}
   .mode button{border:0;padding:8px 10px;cursor:pointer;background:#f3f4f6}
   .mode button.active{background:#1e88e5;color:#fff;font-weight:700}
 
-  textarea{width:100%;min-height:120px;resize:vertical;border:1px solid #e5e7eb;border-radius:10px;padding:10px}
-  input[type="text"], input[type="number"], select{padding:8px;border:1px solid #e5e7eb;border-radius:8px}
+  textarea,input[type="text"],input[type="number"],select{border:1px solid var(--border);border-radius:10px;padding:10px}
+  textarea{width:100%;min-height:120px;resize:vertical}
   .btn{appearance:none;border:none;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer;transition:transform .05s ease,opacity .15s}
-  .btn:hover{transform:translateY(-1px)} .btn:disabled{opacity:.6;cursor:not-allowed}
-  .btn.pri{background:var(--blue);color:#fff} .btn.sec{background:#eef2f7;color:#111}
-  .btn.gold{background:var(--gold);color:#1f2a37} .btn.green{background:var(--green);color:#03210f} .btn.purple{background:var(--purple);color:#fff}
+  .btn:hover{transform:translateY(-1px)}
+  .btn:disabled{opacity:.6;cursor:not-allowed}
+  .btn.pri{background:var(--blue);color:#fff}
+  .btn.sec{background:var(--soft);color:#111}
+  .btn.gold{background:var(--gold);color:#1f2a37}
+  .btn.green{background:var(--green);color:#03210f}
+  .btn.purple{background:var(--purple);color:#fff}
+
+  #statusMsg{display:none;margin-bottom:12px;padding:10px 12px;border-radius:12px;border:1px solid #bfdbfe;background:#eff6ff;color:#1e3a8a;font-weight:600}
+  #statusMsg.show{display:block}
+  #statusMsg.ok{border-color:#86efac;background:var(--okbg);color:#166534}
+  #statusMsg.warn{border-color:#fdba74;background:var(--warnbg);color:#9a3412}
 
   #wordDisplay{background:#fff;padding:18px 16px;border-radius:14px;border:1px solid #e7e7e7;box-shadow:0 6px 18px rgba(0,0,0,.06);font-size:22px;line-height:2;min-height:120px}
+  #wordDisplay.empty{display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:18px}
   #wordDisplay .word{display:inline-block;margin:4px 6px;padding:6px 10px;border:1.5px solid #cfd6e4;border-radius:10px;background:#fff;cursor:pointer;user-select:none;transition:transform .05s,background .15s,outline .15s}
   #wordDisplay .word:hover{transform:scale(1.03)}
   .word.error{background:#ffe3e3;border-color:#e08b8b;box-shadow:inset 0 0 0 2px #ffc2c2}
   .word.last{background:#d1fae5;border-color:#34d399;outline:3px solid #86efac}
-  .word.prev{background:#e0f2fe;border-color:#38bdf8;box-shadow:0 0 0 3px rgba(56,189,248,.25) inset; position:relative}
-  .word.prev::after{content:'forrige'; position:absolute; top:-12px; right:-6px; font-size:10px; background:#0ea5e9; color:#fff; padding:2px 6px; border-radius:6px}
+  .word.prev{background:#e0f2fe;border-color:#38bdf8;box-shadow:0 0 0 3px rgba(56,189,248,.25) inset}
   .word.beyond{opacity:.28}
-  #wordDisplay.no-click { pointer-events:none; opacity:.85; filter:saturate(.8) }
+  #wordDisplay.no-click{pointer-events:none;opacity:.85;filter:saturate(.8)}
 
   .inline-stats{color:var(--muted);margin-top:8px;font-size:14px}
-  .kpi{background:#fff;border:1px solid #e5e7eb;border-radius:12px;box-shadow:0 6px 16px rgba(0,0,0,.06);padding:12px}
-  .kpi h3{margin:0 0 6px;font-size:16px}
   .timerBox{display:flex;flex-direction:column;align-items:center;gap:8px}
   .time{font-size:42px;font-weight:800}
-  .controls{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
-  .quick{display:flex;gap:6px;flex-wrap:wrap}
+  .controls,.quick{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
   .progress{height:12px;background:#ecf0f5;border-radius:6px;overflow:hidden}
   .progress .bar{height:100%;background:var(--blue);width:0}
-
-  .results{max-width:1280px;margin:10px auto 40px;padding:0 16px}
-  table{width:100%;border-collapse:collapse;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 6px 16px rgba(0,0,0,.05)}
-  thead th{background:#f9fafb;text-align:left}
-  th,td{padding:10px 12px;border-bottom:1px solid #eef2f7;font-size:14px}
-  tbody tr:hover{background:#fcfcfc}
-
-  .modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:10000}
-  .modal.active{display:flex}
-  .modal .card{background:#fff;border-radius:14px;border:1px solid #e5e7eb;min-width:320px;max-width:92vw;padding:18px;box-shadow:0 14px 30px rgba(0,0,0,.25);text-align:center}
-  .reels{display:flex;gap:12px;justify-content:center;margin:14px 0}
-  .reel{font-size:48px;border:1px solid #e5e7eb;border-radius:10px;width:70px;height:70px;display:flex;align-items:center;justify-content:center}
-
-  #startOverlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.78);color:#fff;font-size:min(18vw,140px);font-weight:900;letter-spacing:2px;z-index:11000}
-  #flashModal .wordbig{font-size:min(10vw,64px);font-weight:800;margin:10px 0}
-  #flashModal .sub{color:#64748b;margin-bottom:10px}
-  #postRoundBar{display:none;margin-top:8px;padding:8px 10px;border:1px dashed #94a3b8;border-radius:10px;background:#f8fafc;color:#334155;align-items:center;gap:8px}
-  #postRoundBar .hint{font-size:12px;color:#475569}
+  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px}
+  .muted{color:#6b7280;font-size:13px}
   .tabs{display:flex;gap:6px;flex-wrap:wrap;margin:4px 0 8px}
-  .tab{border:1px solid #e5e7eb;border-radius:999px;padding:6px 10px;background:#f3f4f6;cursor:pointer}
+  .tab{border:1px solid var(--border);border-radius:999px;padding:6px 10px;background:#f3f4f6;cursor:pointer}
   .tab.active{background:#1e88e5;color:#fff;font-weight:700}
   .bank{display:grid;grid-template-columns:repeat(auto-fill,minmax(52px,1fr));gap:6px;margin-top:8px}
   .chip{border:1px solid #cfd6e4;border-radius:10px;padding:6px 0;text-align:center;background:#fff;cursor:pointer;user-select:none}
   .chip.sel{background:#dbeafe;border-color:#60a5fa;font-weight:700}
-  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px}
-  .muted{color:#6b7280;font-size:13px}
-  .testgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-  @media (max-width:720px){ .testgrid{grid-template-columns:1fr} }
-  .preview{border:1px dashed #cbd5e1;border-radius:10px;padding:10px;background:#f8fafc;font-size:14px;color:#334155}
-  .copybox{width:min(720px,90vw);min-height:160px;text-align:left}
-  .leftalign{text-align:left}
+
+  #postRoundBar{display:none;margin-top:8px;padding:8px 10px;border:1px dashed #94a3b8;border-radius:10px;background:#f8fafc;color:#334155;align-items:center;gap:8px}
+  .results{max-width:1280px;margin:10px auto 40px;padding:0 16px}
+  table{width:100%;border-collapse:collapse;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 6px 16px rgba(0,0,0,.05)}
+  thead th{background:#f9fafb;text-align:left}
+  th,td{padding:10px 12px;border-bottom:1px solid var(--soft);font-size:14px}
+
+  .modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:10000}
+  .modal.active{display:flex}
+  .modal .card{background:#fff;border-radius:14px;border:1px solid var(--border);min-width:320px;max-width:92vw;padding:18px;box-shadow:0 14px 30px rgba(0,0,0,.25);text-align:center}
+  #startOverlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.78);color:#fff;font-size:min(18vw,140px);font-weight:900;z-index:11000}
+
+  #flashcardArea{display:none;background:#fff;padding:18px 16px;border-radius:14px;border:1px solid #e7e7e7;box-shadow:0 6px 18px rgba(0,0,0,.06);text-align:center}
+  #flashcardWord{font-size:clamp(34px,7vw,68px);font-weight:900;min-height:92px;display:flex;align-items:center;justify-content:center}
 
   .writeWrap{display:grid;grid-template-columns:1.1fr .9fr;gap:12px}
   @media (max-width:840px){ .writeWrap{grid-template-columns:1fr} }
-  .writeStage{border:1px solid #e5e7eb;border-radius:14px;padding:14px;background:#fafcff;min-height:220px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center}
-  .writeFlash{font-size:clamp(34px,7vw,68px);font-weight:900;letter-spacing:1px;min-height:92px;display:flex;align-items:center;justify-content:center}
+  .writeStage{border:1px solid var(--border);border-radius:14px;padding:14px;background:#fafcff;min-height:220px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center}
+  .writeFlash{font-size:clamp(34px,7vw,68px);font-weight:900;min-height:92px;display:flex;align-items:center;justify-content:center}
   .writeFlash.hiddenWord{color:transparent;text-shadow:0 0 10px rgba(100,116,139,.45)}
-  .writePrompt{font-size:14px;color:#64748b}
   .writeAnswer{width:100%;max-width:340px;text-align:center;font-size:28px;font-weight:700;text-transform:lowercase}
-  .writeFeedback{min-height:28px;font-weight:700}
-  .ok{color:#15803d}.bad{color:#b91c1c}
   .writeMini{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:10px}
-  .miniCard{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:10px;text-align:center}
+  .miniCard{background:#fff;border:1px solid var(--border);border-radius:12px;padding:10px;text-align:center}
   .miniCard .n{font-weight:900;font-size:22px}
+  .ok{color:#15803d}.bad{color:#b91c1c}
+  .hide{display:none !important}
 </style>
 </head>
 <body>
@@ -113,44 +112,44 @@
   <div class="panel">
     <div class="hd">
       <div class="mode" role="tablist" aria-label="Modus">
-        <button id="modeText" class="active" aria-selected="true">Tekst</button>
-        <button id="modeLetters" aria-selected="false">Bokstaver</button>
-        <button id="modeDip" aria-selected="false">Diftonger</button>
-        <button id="modeGraf" aria-selected="false">Grafemer</button>
-        <button id="modeHF" aria-selected="false">Vanlige ord</button>
-        <button id="modeTest" aria-selected="false">Test</button>
-        <button id="modeWrite" aria-selected="false">Skriving</button>
+        <button id="modeText" class="active">Tekst</button>
+        <button id="modeLetters">Bokstaver</button>
+        <button id="modeDip">Diftonger</button>
+        <button id="modeGraf">Grafemer</button>
+        <button id="modeHF">Vanlige ord</button>
+        <button id="modeTest">Test</button>
+        <button id="modeWrite">Skriving</button>
       </div>
       <button class="btn sec" id="resetRoundBtn">Nullstill omgang</button>
-      <button class="btn sec" id="flashBtn" title="Vis siste feil som gloser">Flash siste feil</button>
+      <button class="btn sec" id="flashBtn">Flash siste feil</button>
     </div>
 
     <div class="bd" id="textArea">
-      <textarea id="inputText" placeholder="Lim inn avsnitt eller en tekst (f.eks. eventyr)…"></textarea>
+      <textarea id="inputText" placeholder="Lim inn avsnitt eller tekst…"></textarea>
       <div class="row">
-        <label><input type="checkbox" id="scrambleChk"> Bland ord (scramble)</label>
+        <label><input type="checkbox" id="scrambleChk"> Bland ord</label>
         <button class="btn pri" id="prepareBtn">Klargjør tekst</button>
-        <button class="btn sec" id="toggleOrderBtn" style="display:none">Vis original rekkefølge</button>
-        <span class="muted">Tips: Dobbeltklikk på ord = «siste leste». Enter = bekreft «siste».</span>
+        <button class="btn sec hide" id="toggleOrderBtn">Vis original rekkefølge</button>
+        <span class="muted">Dobbeltklikk på ord = siste leste.</span>
       </div>
     </div>
 
-    <div class="bd" id="letterArea" style="display:none">
-      <div class="row"><span class="muted">Velg bokstaver (maks 120 i øving)</span></div>
+    <div class="bd hide" id="letterArea">
+      <div class="row"><span class="muted">Velg bokstaver</span></div>
       <div class="row">
         <button class="btn sec" id="selectVowels">Vokaler</button>
         <button class="btn sec" id="selectConsonants">Konsonanter</button>
         <button class="btn sec" id="clearLetters">Tøm</button>
       </div>
-      <div id="letterBank" class="bank" aria-label="Bokstavbank"></div>
+      <div id="letterBank" class="bank"></div>
       <div class="row">
         <label>Lengde: <input id="lenLetters" type="number" min="1" max="120" value="120" style="width:70px"></label>
+        <label><input type="checkbox" id="lettersFlashChk"> Presenter som flashcards</label>
         <button class="btn pri" id="genLetters">Generer</button>
-        <span class="muted">Rekkefølgen blir ikke lik forrige omgang.</span>
       </div>
     </div>
 
-    <div class="bd" id="bankAreaDip" style="display:none">
+    <div class="bd hide" id="bankAreaDip">
       <div class="row">
         <span><b>Huk av ord</b></span>
         <button class="btn sec" id="selectAllDip">Velg alle</button>
@@ -158,13 +157,13 @@
       </div>
       <div id="bankDip" class="bank"></div>
       <div class="row">
-        <label>Lengde: <input id="lenDip" type="number" min="1" max="120" value="120" style="width:70px;"></label>
+        <label>Lengde: <input id="lenDip" type="number" min="1" max="120" value="120" style="width:70px"></label>
+        <label><input type="checkbox" id="dipFlashChk"> Presenter som flashcards</label>
         <button class="btn pri" id="genDip">Generer</button>
-        <span class="muted">Unngår identisk rekkefølge som forrige omgang.</span>
       </div>
     </div>
 
-    <div class="bd" id="bankAreaGraf" style="display:none">
+    <div class="bd hide" id="bankAreaGraf">
       <div class="row">
         <span><b>Huk av ord</b></span>
         <button class="btn sec" id="selectAllGraf">Velg alle</button>
@@ -172,53 +171,50 @@
       </div>
       <div id="bankGraf" class="bank"></div>
       <div class="row">
-        <label>Lengde: <input id="lenGraf" type="number" min="1" max="120" value="120" style="width:70px;"></label>
+        <label>Lengde: <input id="lenGraf" type="number" min="1" max="120" value="120" style="width:70px"></label>
+        <label><input type="checkbox" id="grafFlashChk"> Presenter som flashcards</label>
         <button class="btn pri" id="genGraf">Generer</button>
-        <span class="muted">Unngår identisk rekkefølge som forrige omgang.</span>
       </div>
     </div>
 
-    <div class="bd" id="bankAreaHF" style="display:none">
+    <div class="bd hide" id="bankAreaHF">
       <div class="row">
         <div class="tabs" id="hfTabs"></div>
-        <button class="btn sec" id="selectAllHF">Velg alle (denne kategorien)</button>
+        <button class="btn sec" id="selectAllHF">Velg alle</button>
         <button class="btn sec" id="clearAllHF">Tøm</button>
       </div>
       <div id="bankHF" class="bank"></div>
       <div class="row">
-        <label>Lengde: <input id="lenHF" type="number" min="1" max="120" value="120" style="width:70px;"></label>
+        <label>Lengde: <input id="lenHF" type="number" min="1" max="120" value="120" style="width:70px"></label>
+        <label><input type="checkbox" id="hfFlashChk"> Presenter som flashcards</label>
         <button class="btn pri" id="genHF">Generer</button>
-        <span class="muted">Kategorier på 10 ord (HF-01, HF-02, …).</span>
       </div>
     </div>
 
-    <div class="bd" id="testArea" style="display:none">
-      <div class="testgrid">
-        <div>
-          <label for="testType"><b>Testtype</b></label><br/>
-          <select id="testType" style="width:100%">
+    <div class="bd hide" id="testArea">
+      <div class="row">
+        <label>Testtype
+          <select id="testType">
             <option value="pre">Pre-test</option>
             <option value="post">Post-test</option>
           </select>
-        </div>
-        <div>
-          <label for="testText"><b>Tekst</b></label><br/>
-          <select id="testText" style="width:100%">
-            <option value="pa_tur">1. trinn – enkel lyd- og ordlesing — «På tur»</option>
-            <option value="i_hagen">2. trinn – sammenhengende fortelling — «I hagen»</option>
-            <option value="den_nye_sykkelen">3.–4. trinn — «Den nye sykkelen»</option>
-            <option value="reisen_til_maanen">5.–7. trinn — «Reisen til månen»</option>
+        </label>
+        <label>Tekst
+          <select id="testText">
+            <option value="pa_tur">På tur</option>
+            <option value="i_hagen">I hagen</option>
+            <option value="den_nye_sykkelen">Den nye sykkelen</option>
+            <option value="reisen_til_maanen">Reisen til månen</option>
           </select>
-        </div>
+        </label>
       </div>
       <div class="row">
         <button class="btn pri" id="loadTestBtn">Last inn testtekst</button>
-        <span class="muted">Testtekst lastes i riktig rekkefølge (ingen scramble).</span>
       </div>
-      <div class="preview leftalign" id="testPreview"></div>
+      <div class="muted" id="testPreview"></div>
     </div>
 
-    <div class="bd" id="writeArea" style="display:none">
+    <div class="bd hide" id="writeArea">
       <div class="writeWrap">
         <div>
           <div class="row">
@@ -228,35 +224,32 @@
             <button class="btn sec" id="write5">5 sekunder</button>
             <label>Egendefinert tid: <input id="writeCustomSec" type="number" min="0" max="20" step="0.01" value="5" style="width:72px"></label>
             <button class="btn sec" id="applyWriteCustom">Bruk tid</button>
-            <span class="muted">Ordet flashes, skjules, og eleven skriver det fra minnet.</span>
           </div>
           <div class="row">
             <button class="btn sec" id="selectAllWrite">Velg alle</button>
             <button class="btn sec" id="clearAllWrite">Tøm</button>
-            <label>Antall ord i økta: <input id="writeLen" type="number" min="1" max="30" value="10" style="width:70px"></label>
+            <label>Antall ord: <input id="writeLen" type="number" min="1" max="30" value="10" style="width:70px"></label>
             <button class="btn purple" id="startWriteBtn">Start skrivetrening</button>
           </div>
           <div class="row">
-            <textarea id="writeCustomWords" placeholder="Skriv egne ord her. Ett ord per linje, eller skill med komma." style="min-height:90px"></textarea>
+            <textarea id="writeCustomWords" placeholder="Egne ord. Ett per linje eller med komma." style="min-height:90px"></textarea>
           </div>
           <div class="row">
             <button class="btn sec" id="addWriteWordsBtn">Legg til egne ord</button>
             <button class="btn sec" id="clearCustomWriteWordsBtn">Fjern egne ord</button>
-            <span class="muted">Egner seg for korte, lydrette ord.</span>
           </div>
           <div id="writeBank" class="bank"></div>
         </div>
-
         <div>
           <div class="writeStage">
-            <div class="writePrompt" id="writePrompt">Velg ord og start økta.</div>
+            <div class="muted" id="writePrompt">Velg ord og start økta.</div>
             <div class="writeFlash" id="writeFlash">klar</div>
-            <input id="writeAnswer" class="writeAnswer" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="skriv ordet her" disabled>
+            <input id="writeAnswer" class="writeAnswer" type="text" spellcheck="false" autocomplete="off" disabled>
             <div class="row" style="justify-content:center">
               <button class="btn pri" id="checkWriteBtn" disabled>Sjekk</button>
               <button class="btn sec" id="nextWriteBtn" disabled>Neste ord</button>
             </div>
-            <div class="writeFeedback" id="writeFeedback"></div>
+            <div id="writeFeedback"></div>
           </div>
           <div class="writeMini">
             <div class="miniCard"><div>Riktige</div><div class="n" id="writeCorrect">0</div></div>
@@ -269,20 +262,29 @@
     </div>
 
     <div class="bd" id="readSharedArea">
-      <div id="wordDisplay"></div>
-      <div class="inline-stats">
-        Totalt: <b id="totalWords">0</b> · Feil (telt): <b id="mistakeCount">0</b> · Korrekte (telt): <b id="correctCount">0</b>
+      <div id="statusMsg"></div>
+      <div id="wordDisplay" class="empty">Ingen tekst lastet inn ennå.</div>
+      <div id="flashcardArea" tabindex="0">
+        <div id="flashcardProg" class="muted">Kort 0 av 0</div>
+        <div id="flashcardWord">klar</div>
+        <div class="row" style="justify-content:center">
+          <button class="btn pri" id="flashDrillStartBtn">Start drill</button>
+          <button class="btn green" id="flashNextCardBtn">Neste kort</button>
+          <button class="btn sec" id="flashExitBtn">Lukk drill</button>
+        </div>
+        <div class="muted" style="margin-top:10px">Trykk <b>spacebar</b> eller <b>Neste kort</b> mens nedtellingen går.</div>
       </div>
+      <div class="inline-stats">Totalt: <b id="totalWords">0</b> · Feil: <b id="mistakeCount">0</b> · Korrekte: <b id="correctCount">0</b></div>
       <div id="postRoundBar">
-        <span class="hint">⏰ Tiden er ute – marker feil og klikk på <b>siste</b>. Deretter «Avslutt omgang».</span>
+        <span class="muted">⏰ Marker feil. I nedtelling for vanlig visning klikker du også siste. I stoppeklokke og flash-drill klikker du bare Avslutt omgang.</span>
         <button class="btn green" id="finishBtn" style="margin-left:auto">Avslutt omgang</button>
       </div>
     </div>
   </div>
 
-  <div class="stack" style="display:flex;flex-direction:column;gap:12px">
+  <div style="display:flex;flex-direction:column;gap:12px">
     <div class="kpi">
-      <h3>Stoppeklokke</h3>
+      <h3 style="margin-top:0">Stoppeklokke</h3>
       <div class="timerBox">
         <div id="swTime" class="time">00:00</div>
         <div class="controls">
@@ -290,14 +292,12 @@
           <button class="btn sec" id="swStop">Stopp</button>
           <button class="btn sec" id="swReset">Nullstill</button>
         </div>
-        <label style="display:flex;gap:6px;align-items:center;justify-content:center;margin-top:6px">
-          <input type="checkbox" id="allowMarkingDuringTimer">
-          Tillat markering mens timer går
-        </label>
+        <label><input type="checkbox" id="allowMarkingDuringTimer"> Tillat markering mens timer går</label>
       </div>
     </div>
+
     <div class="kpi">
-      <h3>Nedtelling</h3>
+      <h3 style="margin-top:0">Nedtelling</h3>
       <div class="timerBox">
         <div class="quick">
           <button class="btn sec" id="q10">10s</button>
@@ -312,30 +312,26 @@
         </div>
       </div>
     </div>
+
     <div class="kpi">
-      <h3>Premiesporing</h3>
+      <h3 style="margin-top:0">Premiesporing</h3>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:center">
         <div>
           <div>Diamanter</div>
           <div class="progress"><div id="diamondBar" class="bar"></div></div>
         </div>
         <div style="text-align:right">
-          <button class="btn gold" id="openSlotBtn" style="display:none">Åpne spilleautomat</button>
+          <button class="btn gold hide" id="openSlotBtn">Åpne spilleautomat</button>
         </div>
       </div>
     </div>
+
     <div class="kpi">
-      <h3>Data</h3>
-      <div class="row">
-        <label for="studentInput"><b>Elevnavn</b></label>
-        <input id="studentInput" type="text" placeholder="F.eks. Adam" style="flex:1;min-width:160px">
-        <button class="btn sec" id="setStudentBtn">Sett navn</button>
-        <select id="studentSelect" title="Tidligere navn" style="min-width:140px;display:none"></select>
-      </div>
+      <h3 style="margin-top:0">Data</h3>
       <div class="row">
         <button class="btn sec" id="exportCsvBtn">Eksporter CSV</button>
-        <button class="btn sec" id="clearDataBtn" title="Sletter kun resultater (ikke ordlister)">Nullstill resultater</button>
-        <button class="btn sec" id="resetAllBtn" title="Full nullstilling (kode: 1985)">Full nullstilling (kode: 1985)</button>
+        <button class="btn sec" id="clearDataBtn">Nullstill resultater</button>
+        <button class="btn sec" id="resetAllBtn">Full nullstilling (kode: 1985)</button>
       </div>
     </div>
   </div>
@@ -344,426 +340,1243 @@
 <section class="results">
   <h2 style="margin:10px 0">Resultater</h2>
   <table>
-    <thead><tr>
-      <th>#</th><th>Dato/tid</th><th>Elev</th><th>Tid (s)</th><th>Antall</th><th>Feil (/min)</th><th>Korrekte (/min)</th><th>K-OPM</th><th>Poeng</th><th>Modus</th>
-    </tr></thead>
+    <thead><tr><th>#</th><th>Dato/tid</th><th>Tid (s)</th><th>Antall</th><th>Feil (/min)</th><th>Korrekte (/min)</th><th>K-OPM</th><th>Poeng</th><th>Modus</th></tr></thead>
     <tbody id="resultsBody"></tbody>
   </table>
 </section>
 
 <div id="startOverlay">3</div>
-<div id="slotModal" class="modal" aria-modal="true" role="dialog">
+<div id="slotModal" class="modal">
   <div class="card">
     <h3>Spilleautomat</h3>
-    <div class="reels"><div id="reel1" class="reel">🍒</div><div id="reel2" class="reel">🍋</div><div id="reel3" class="reel">🔔</div></div>
+    <div style="display:flex;gap:12px;justify-content:center;margin:14px 0">
+      <div id="reel1" style="font-size:48px">🍒</div>
+      <div id="reel2" style="font-size:48px">🍋</div>
+      <div id="reel3" style="font-size:48px">🔔</div>
+    </div>
     <div id="slotMsg">Trykk Spinn</div>
-    <div style="margin-top:10px;display:flex;gap:8px;justify-content:center">
+    <div class="row" style="justify-content:center">
       <button class="btn gold" id="slotSpin">Spinn</button>
       <button class="btn sec" id="slotClose">Lukk</button>
     </div>
   </div>
 </div>
-<div id="flashModal" class="modal" aria-modal="true" role="dialog">
+
+<div id="flashModal" class="modal">
   <div class="card">
-    <div class="sub" id="flashProg">Ord 1 av 1</div>
-    <div class="wordbig" id="flashWord">ord</div>
-    <div style="display:flex;gap:8px;justify-content:center;margin-top:8px">
+    <div id="flashProg" class="muted">Ord 1 av 1</div>
+    <div id="flashWord" style="font-size:min(10vw,64px);font-weight:800;margin:10px 0">ord</div>
+    <div class="row" style="justify-content:center">
       <button class="btn pri" id="flashNext">Neste ord</button>
       <button class="btn sec" id="flashDone">Ferdig</button>
     </div>
   </div>
 </div>
-<div id="summaryModal" class="modal" aria-modal="true" role="dialog">
-  <div class="card leftalign">
-    <h3>Oppsummering (kopier til rapport)</h3>
-    <textarea id="summaryText" class="copybox"></textarea>
-    <div class="row" style="justify-content:center;margin-top:8px">
+
+<div id="summaryModal" class="modal">
+  <div class="card" style="text-align:left">
+    <h3>Oppsummering</h3>
+    <textarea id="summaryText" style="width:min(720px,90vw);min-height:160px"></textarea>
+    <div class="row" style="justify-content:center">
       <button class="btn pri" id="copySummaryBtn">Kopier</button>
       <button class="btn sec" id="closeSummaryBtn">Lukk</button>
     </div>
   </div>
 </div>
-<div aria-live="polite" aria-atomic="true" id="liveRegion" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden"></div>
+
+<div aria-live="polite" id="liveRegion" style="position:absolute;left:-9999px"></div>
 
 <script>
 (function(){
   'use strict';
 
   const $ = id => document.getElementById(id);
-  const fmt = t => { const m=String(Math.floor(t/60)).padStart(2,'0'); const s=String(t%60).padStart(2,'0'); return `${m}:${s}`; };
-  const norm = s => String(s||'').toLowerCase().trim().replace(/\s+/g,' ');
-  const KEY='rl_v14_multi_write_custom';
-  const def={ rounds:[], coins:0, bestWPM:0, diamonds:0, diamondProgress:0, wordBank:[], roundCount:0, prevLastIdx:null, lastMistakes:[], lightning:0, prevSeq:"", savedOriginal:[], currentStudent:"", students:[], writeBestStreak:0, customWriteWords:[] };
-  let S = (()=>{ try{ const j=JSON.parse(localStorage.getItem(KEY)||'null'); return j?j:{...def}; }catch{ return {...def}; }})();
-  function save(){ localStorage.setItem(KEY, JSON.stringify(S)); }
+  const bySel = sel => Array.from(document.querySelectorAll(sel));
+  const formatTime = totalSec => {
+    const mins = String(Math.floor(totalSec / 60)).padStart(2, '0');
+    const secs = String(totalSec % 60).padStart(2, '0');
+    return `${mins}:${secs}`;
+  };
+  const normalizeText = s => String(s || '').toLowerCase().trim().replace(/\s+/g, ' ');
+  const clamp = (n, min, max) => Math.min(max, Math.max(min, n));
+  const unique = arr => Array.from(new Set(arr));
 
-  const vowels=['a','e','i','o','u','y','æ','ø','å'];
-  const alphabet=['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','æ','ø','å'];
-  const consonants=alphabet.filter(ch=>!vowels.includes(ch));
+  const STORAGE_KEY = 'rl_stabil_v3';
+  const defaultState = {
+    rounds: [],
+    coins: 0,
+    bestWPM: 0,
+    diamonds: 0,
+    diamondProgress: 0,
+    wordBank: [],
+    roundCount: 0,
+    prevLastIdx: null,
+    lastMistakes: [],
+    lightning: 0,
+    prevSeq: '',
+    savedOriginal: [],
+    customWriteWords: []
+  };
 
-  const DIFTONG_ORD=['Leie','Maur','Hai','Sau','Øy','Feier','Vei','Tøye','Bøye','Pløye','Heie','Reise','Stein','Seier','Feil','Feire','Trøye','Høyde','Tau','Peis','Fløyte','Hauk','Øye','Høy','Flau','Rein','Sløyfe','Bein','Reir','Heis','Leire','Lei','Geit','Hei','Eik','Speil','Sei','Grein','Geipe','Feie','Seile','Sleiv','Saus','Gaupe','Applaus','Dinosaur','Haug','Astronaut','Kai','Pai','Vaier','Mais','Vaie','Thailand','Skøyter','Søyle','Røyskatt','Køyeseng'];
-  const GRAFEM_ORD=['sjokolade','sjø','sjal','sjekk','sjenke','skjorte','skjema','skjegg','skjønn','skjule','tjener','tjene','tjukk','tjern','kjempe','kjerne','kjole','kjøtt','kjøre','kjekk','kjær','gjeng','gjøre','gjest','gjerne','gjenstand','hjelp','hjerne','hjul','hjem','hjerte','sang','lang','ring','fange','lenge','bord','gardin','barn','jern','kort','hørt','vers'];
-  const WRITE_WORDS_BASE=['sol','is','pil','hus','mus','tak','mat','lam','bil','bok','rev','egg','tog','duk','sok','rop','ris','bus','sur','sko','båt','lys','myr','ved','liv','mel','jul','pak','lur','hatt','glass','gul','ape','sau','rev','tau','kai','fe','lo','ti'];
-  function getWriteWords(){ return [...WRITE_WORDS_BASE, ...((S.customWriteWords||[]))]; }
+  function loadState(){
+    try{
+      const raw = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null') || {};
+      return {
+        ...structuredClone(defaultState),
+        ...raw,
+        rounds: Array.isArray(raw.rounds) ? raw.rounds : [],
+        wordBank: Array.isArray(raw.wordBank) ? raw.wordBank : [],
+        lastMistakes: Array.isArray(raw.lastMistakes) ? raw.lastMistakes : [],
+        savedOriginal: Array.isArray(raw.savedOriginal) ? raw.savedOriginal : [],
+        customWriteWords: Array.isArray(raw.customWriteWords) ? raw.customWriteWords : []
+      };
+    }catch{
+      return structuredClone(defaultState);
+    }
+  }
 
-  const HF_RAW=`1\nog\n2\ni\n3\ndet\n4\npå\n5\nsom\n6\ner\n7\nen\n8\ntil\n9\nå\n10\nhan\n11\nav\n12\nfor\n13\nmed\n14\nat\n15\nvar\n16\nde\n17\nikke\n18\nden\n19\nhar\n20\njeg\n21\nom\n22\net\n23\nmen\n24\nså\n25\nseg\n26\nhun\n27\nhadde\n28\nfra\n29\nvi\n30\ndu\n31\nkan\n32\nda\n33\nble\n34\nut\n35\nskal\n36\nvil\n37\nham\n38\netter\n39\nover\n40\nved\n41\nogså\n42\nbare\n43\neller\n44\nsa\n45\nnå\n46\ndette\n47\nnoe\n48\nvære\n49\nmeg\n50\nmot\n51\nopp\n52\nder\n53\nnår\n54\ninn\n55\ndem\n56\nkunne\n57\nandre\n58\nblir\n59\nalle\n60\nnoen\n61\nsin\n62\nha\n63\når\n64\nhenne\n65\nmå\n66\nselv\n67\nsier\n68\nfå\n69\nkom\n70\ndenne\n71\nenn\n72\nto\n73\nhans\n74\nbli\n75\nville\n76\nfør\n77\nvært\n78\nskulle\n79\ngår\n80\nher\n81\nslik\n82\ngikk\n83\nmer\n84\nhva\n85\nigjen\n86\nfikk\n87\nman\n88\nalt\n89\nmange\n90\ndash\n91\ningen\n92\nfår\n93\noss\n94\nhvor\n95\nunder\n96\nsiden\n97\nhele\n98\ndag\n99\ngang\n100\nsammen\n101\nned\n102\nkommer\n103\nsine\n104\ndeg\n105\nse\n106\nførste\n107\ngodt\n108\nmellom\n109\nmåtte\n110\ngå\n111\nhelt\n112\nlitt\n113\nnok\n114\nstore\n115\naldri\n116\nta\n117\nsig\n118\nuten\n119\nho\n120\nkanskje`;
+  let state = loadState();
+  const persist = () => localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  const announce = msg => {
+    $('liveRegion').textContent = '';
+    setTimeout(() => $('liveRegion').textContent = msg, 10);
+  };
 
-  function parseHF(raw){
-    const out=[]; const seen=new Set();
-    raw.split(/\r?\n/).forEach(ln=>{ const t=(ln||'').trim(); if(!t) return; if(/^\d+$/.test(t)) return; const low=t.toLowerCase(); if(!/^[A-Za-zÆØÅæøå\-]{2,}$/.test(low)) return; if(!seen.has(low)){ seen.add(low); out.push(low);} });
+  const vowels = ['a','e','i','o','u','y','æ','ø','å'];
+  const alphabet = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','æ','ø','å'];
+  const consonants = alphabet.filter(ch => !vowels.includes(ch));
+  const DIFTONG_ORD = ['Leie','Maur','Hai','Sau','Øy','Feier','Vei','Tøye','Bøye','Pløye','Heie','Reise','Stein','Seier','Feil','Feire','Trøye','Høyde','Tau','Peis','Fløyte','Hauk','Øye','Høy','Flau','Rein','Sløyfe','Bein','Reir','Heis','Leire','Lei','Geit','Hei','Eik','Speil','Sei','Grein','Geipe','Feie','Seile','Sleiv','Saus','Gaupe','Applaus','Dinosaur','Haug','Astronaut','Kai','Pai','Vaier','Mais','Vaie','Thailand','Skøyter','Søyle','Røyskatt','Køyeseng'];
+  const GRAFEM_ORD = ['sjokolade','sjø','sjal','sjekk','sjenke','skjorte','skjema','skjegg','skjønn','skjule','tjener','tjene','tjukk','tjern','kjempe','kjerne','kjole','kjøtt','kjøre','kjekk','kjær','gjeng','gjøre','gjest','gjerne','gjenstand','hjelp','hjerne','hjul','hjem','hjerte','sang','lang','ring','fange','lenge','bord','gardin','barn','jern','kort','hørt','vers'];
+  const WRITE_WORDS_BASE = ['sol','is','pil','hus','mus','tak','mat','lam','bil','bok','rev','egg','tog','duk','sok','rop','ris','bus','sur','sko','båt','lys','myr','ved','liv','mel','jul','pak','lur','hatt','glass','gul','ape','sau','rev','tau','kai','fe','lo','ti'];
+  const HF_ALL = ['og','i','det','på','som','er','en','til','å','han','av','for','med','at','var','de','ikke','den','har','jeg','om','et','men','så','seg','du','kan','da','ble','ut','skal','vil','ham','etter','over','ved','også','bare','eller','sa','nå','dette','noe','være','meg','mot','opp','der','når','inn','dem','kunne','andre','blir','alle','noen','sin','ha','år','henne','må','selv','sier','få','kom','denne','enn','to','hans','bli','ville','før','vært','skulle','går','her','slik','gikk','mer','hva','igjen','fikk','man','alt','mange','ingen','får','oss','hvor','under','siden','hele','dag','gang','sammen','ned','kommer','sine','deg','se','første','godt','mellom','måtte','gå','helt','litt','nok','store','aldri','ta','sig','uten','ho','kanskje','blitt','ser','hvis','bergen','sitt','jo','vel','si','vet','hennes','min','tre','ja','samme','mye','nye','tok','gjøre','disse','siste','tid','rundt','tilbake','mens','satt','flere','folk','fordi','både','la','gjennom','fått','like','nei','annet','komme','kroner','gjorde','hvordan','norge','norske','gjør','oslo','står','stor','gamle','langt','annen','sett','først','mener','hver','barn','rett','ny','tatt','derfor','fram','hos','heller','lenge','alltid','tror','nesten','mann','gi','god','lå','blant','norsk','gjort','visste','bak','tar','liv','mennesker','frem','bort','ein','verden','deres','ikkje','tiden','del','vår','mest','eneste','likevel','hatt','dei','tidligere','fire','liten','hvorfor','tenkte','hverandre','holdt','bedre','meget','ting','lite','stod','ei','hvert','begynte','gir','ligger','grunn','dere','livet','sagt','land','kommet','neste','far','efter','egen','side','gått','mor','ute','videre','millioner','prosent','svarte','sto','begge','allerede','inne','finne','enda','hjem','foran','måte','mannen','dagen','hodet','saken','ganger','kjente','stort','blev','mindre','landet','byen','plass','kveld','ord','øynene','fem','større','gode','nu','synes','beste','kvinner','ett','satte','hvem','all','klart','holde','ofte','stille','spurte','lenger','sted','dager','mulig','utenfor','små','frå','nytt','slike','viser','mig','kjenner','samtidig','senere','særlig','våre','akkurat','menn','hørte','arbeidet','altså','par','din','unge','borte','plutselig','fant','fast','kunde','snart','svært','fall','vei','bergens','dessuten','forhold','gjerne','snakket','foto','snakke','bør','dersom','imidlertid','lett','tenke','gud','tro','jan','gitt','penger','egentlig','mitt','ønsker','ansiktet','kl','dermed','slo','politiet','faren','eit','bra','je','sitter','sikkert','vite','full','lille','glad','fleste','slutt','ene','mine','gjelder','lagt','virkelig','laget','alene','ennå','lang','ganske','johan','omkring','hjemme','vårt','vanskelig','arne','gammel','skulde','tidende','riktig','huset','følte','møte','lørdag','klar','kort','viktig','ellers','minst','fortsatt','op','veien','seier','mål','kjent','slags','frode','stund','arbeid','finnes','ingenting','lange','gangen','stå','lot','rekke','redd','høre','vilde','ga','ti','forteller','overfor','stadig','burde','visst','syntes','fjor','sette','funnet','hjelp','største','løpet','meter','norges','hånden','spørsmål','mente','søndag','følge','fremdeles','imot','hus','kvinne','ventet','reiste','hendene','trodde','usa','legger','viste','regjeringen','eg','årene','eksempel','tenkt','ole','slikt','erik','moren','holder','seks'];
+  const HF_CATS = {};
+  for(let i = 0; i < HF_ALL.length; i += 10){
+    HF_CATS[`HF-${String(i / 10 + 1).padStart(2, '0')}`] = HF_ALL.slice(i, i + 10);
+  }
+  const TEST_TEXTS = {
+    pa_tur: {nivå:'1. trinn', tittel:'På tur', tekst:'Lise har en katt. Katten heter Mio. Mio vil løpe. Lise løper etter. De løper til en busk. Der sitter en mus.'},
+    i_hagen: {nivå:'2. trinn', tittel:'I hagen', tekst:'Omar går ut i hagen. Han har en rød bøtte. Han fyller bøtta med jord. Så finner han en mark. Han vil mate fisken med marken. Fisken bor i en dam. Omar blir glad når fisken spiser.'},
+    den_nye_sykkelen: {nivå:'3.–4. trinn', tittel:'Den nye sykkelen', tekst:'Maria hadde spart penger i mange måneder. Endelig kunne hun kjøpe seg en ny sykkel. Sykkelen var blå og hadde en liten kurv foran. Hun syklet bort til venninnen sin. Se hva jeg har fått ropte Maria stolt. De to jentene syklet rundt på veien hele ettermiddagen.'},
+    reisen_til_maanen: {nivå:'5.–7. trinn', tittel:'Reisen til månen', tekst:'I 1969 landet mennesker på månen for aller første gang. Romskipet het Apollo 11, og astronautene som reiste dit var Neil Armstrong, Buzz Aldrin og Michael Collins. Armstrong ble den første som satte foten på månens overflate.'}
+  };
+
+  const app = {
+    ui: {
+      mode: 'text',
+      activeHF: Object.keys(HF_CATS)[0],
+      currentTest: null,
+      flashOriginMode: ''
+    },
+    reading: {
+      tokens: [],
+      mistakes: new Set(),
+      lastIdx: null,
+      lastClickedIdx: null,
+      finishedThisRound: false,
+      savedOriginal: []
+    },
+    timer: {
+      swInt: null,
+      swSec: 0,
+      swRunning: false,
+      swPreparing: false,
+      cdInt: null,
+      cdLeft: 60,
+      cdInit: 60,
+      cdRunning: false,
+      cdPreparing: false
+    },
+    reward: {
+      spinsLeftRound: 0
+    },
+    flashcards: {
+      active: false,
+      cards: [],
+      readCount: 0
+    },
+    banks: {
+      selectedLetters: new Set(),
+      selectedDip: new Set(),
+      selectedGraf: new Set(),
+      selectedHF: new Set(),
+      selectedWrite: new Set([...WRITE_WORDS_BASE, ...state.customWriteWords])
+    },
+    write: {
+      flashSec: 5,
+      queue: [],
+      index: 0,
+      currentWord: '',
+      correct: 0,
+      wrong: 0,
+      answered: false
+    }
+  };
+
+  function getWriteWords(){
+    return [...WRITE_WORDS_BASE, ...state.customWriteWords];
+  }
+
+  function showStatus(msg, type = 'info'){
+    const el = $('statusMsg');
+    el.textContent = msg;
+    el.className = 'show';
+    if(type === 'ok') el.classList.add('ok');
+    else if(type === 'warn') el.classList.add('warn');
+    announce(msg);
+  }
+
+  function hideStatus(){
+    $('statusMsg').className = '';
+    $('statusMsg').textContent = '';
+  }
+
+  function toggleSection(id, visible){
+    $(id).classList.toggle('hide', !visible);
+  }
+
+  function setClickable(isOn){
+    $('wordDisplay').classList.toggle('no-click', !isOn);
+  }
+
+  function shouldLock(){
+    return !$('allowMarkingDuringTimer').checked;
+  }
+
+  function updateTopStats(){
+    $('coinsTotal').textContent = state.coins || 0;
+    $('bestWPM').textContent = state.bestWPM || 0;
+    $('diamonds').textContent = `${state.diamonds || 0}/10`;
+    $('roundCounter').textContent = state.roundCount || 0;
+    $('lightningTotal').textContent = state.lightning || 0;
+    $('diamondPct').textContent = Math.round(((state.diamondProgress || 0) / 10) * 100) + '%';
+    $('diamondBar').style.width = Math.min(100, ((state.diamondProgress || 0) / 10) * 100) + '%';
+  }
+
+  function rebuildResultsTable(){
+    const body = $('resultsBody');
+    body.innerHTML = '';
+    (state.rounds || []).forEach((round, i) => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${i + 1}</td>
+        <td>${new Date(round.ts).toLocaleString(undefined, {hour12:false})}</td>
+        <td>${round.timeSec}</td>
+        <td>${round.total}</td>
+        <td>${round.errors} (${round.fpm}/min)</td>
+        <td>${round.correct} (${round.cpm}/min)</td>
+        <td><b>${round.wpm}</b></td>
+        <td>${round.coins}</td>
+        <td>${round.mode || ''}</td>`;
+      body.appendChild(tr);
+    });
+  }
+
+  function addDiamondProgress(amount){
+    state.diamondProgress = (state.diamondProgress || 0) + amount;
+    while(state.diamondProgress >= 10){
+      state.diamondProgress -= 10;
+      state.diamonds = (state.diamonds || 0) + 1;
+      if(state.diamonds >= 10){
+        alert('🎁 10 diamanter! Premie fra læreren!');
+        state.diamonds = 0;
+      }
+    }
+    persist();
+    updateTopStats();
+  }
+
+  function setMode(mode){
+    app.ui.mode = mode;
+    ['modeText','modeLetters','modeDip','modeGraf','modeHF','modeTest','modeWrite'].forEach(id => $(id).classList.remove('active'));
+    const map = {
+      text:'modeText', letters:'modeLetters', dip:'modeDip', graf:'modeGraf', hf:'modeHF', test:'modeTest', write:'modeWrite'
+    };
+    $(map[mode]).classList.add('active');
+    toggleSection('textArea', mode === 'text');
+    toggleSection('letterArea', mode === 'letters');
+    toggleSection('bankAreaDip', mode === 'dip');
+    toggleSection('bankAreaGraf', mode === 'graf');
+    toggleSection('bankAreaHF', mode === 'hf');
+    toggleSection('testArea', mode === 'test');
+    toggleSection('writeArea', mode === 'write');
+    toggleSection('readSharedArea', mode !== 'write');
+  }
+
+  function resetReadingMarks(){
+    app.reading.mistakes.clear();
+    app.reading.lastIdx = null;
+    app.reading.finishedThisRound = false;
+    bySel('#wordDisplay .word').forEach(node => node.classList.remove('error','last','beyond'));
+  }
+
+  function applyPreviousMarker(){
+    bySel('#wordDisplay .word').forEach(node => node.classList.remove('prev'));
+    if(state.prevLastIdx == null) return;
+    const nodes = bySel('#wordDisplay .word');
+    if(nodes[state.prevLastIdx]) nodes[state.prevLastIdx].classList.add('prev');
+  }
+
+  function getRoundCounts(){
+    if(app.flashcards.active){
+      const total = app.flashcards.readCount;
+      let err = 0;
+      app.reading.mistakes.forEach(i => { if(i < app.flashcards.readCount) err++; });
+      return { total, err, corr: Math.max(0, total - err) };
+    }
+    const total = app.reading.lastIdx === null ? 0 : app.reading.lastIdx + 1;
+    let err = 0;
+    app.reading.mistakes.forEach(i => {
+      if(app.reading.lastIdx !== null && i <= app.reading.lastIdx) err++;
+    });
+    return { total, err, corr: Math.max(0, total - err) };
+  }
+
+  function updateCounts(){
+    const { err, corr } = getRoundCounts();
+    $('totalWords').textContent = app.flashcards.active ? app.flashcards.cards.length : app.reading.tokens.length;
+    $('mistakeCount').textContent = err;
+    $('correctCount').textContent = corr;
+  }
+
+  function setPostRoundBar(visible){
+    $('postRoundBar').style.display = visible ? 'flex' : 'none';
+  }
+
+  function renderTokens(list){
+    stopFlashcards(false);
+    app.reading.tokens = list;
+    const wrap = $('wordDisplay');
+    wrap.innerHTML = '';
+    wrap.classList.toggle('empty', list.length === 0);
+
+    if(!list.length){
+      wrap.textContent = 'Ingen tekst lastet inn ennå.';
+      updateCounts();
+      return;
+    }
+
+    list.forEach((token, i) => {
+      const span = document.createElement('span');
+      span.className = 'word';
+      span.textContent = token;
+      span.dataset.index = String(i);
+      span.addEventListener('click', () => onTokenClick(i, span));
+      span.addEventListener('dblclick', () => setLastRead(i, true));
+      wrap.appendChild(span);
+      wrap.append(' ');
+    });
+    applyPreviousMarker();
+    updateCounts();
+  }
+
+  function toggleError(index, el){
+    if(el.classList.contains('error')){
+      el.classList.remove('error');
+      app.reading.mistakes.delete(index);
+    }else{
+      el.classList.add('error');
+      app.reading.mistakes.add(index);
+    }
+    updateCounts();
+  }
+
+  function setLastRead(index, scroll = false){
+    bySel('#wordDisplay .word.last').forEach(node => node.classList.remove('last'));
+    app.reading.lastIdx = index;
+    const nodes = bySel('#wordDisplay .word');
+    if(nodes[index]){
+      nodes[index].classList.add('last');
+      if(scroll) nodes[index].scrollIntoView({behavior:'smooth', block:'center'});
+    }
+    nodes.forEach((node, idx) => node.classList.toggle('beyond', app.reading.lastIdx !== null && idx > app.reading.lastIdx));
+    updateCounts();
+  }
+
+  function onTokenClick(index, el){
+    app.reading.lastClickedIdx = index;
+    const active = app.timer.swRunning || app.timer.cdRunning || app.timer.swPreparing || app.timer.cdPreparing;
+    if(active || app.reading.finishedThisRound){
+      toggleError(index, el);
+      return;
+    }
+    toggleError(index, el);
+  }
+
+  function buildWordBank(containerId, list, selectedSet){
+    const bank = $(containerId);
+    bank.innerHTML = '';
+    list.forEach(value => {
+      const chip = document.createElement('div');
+      chip.className = 'chip' + (selectedSet.has(value) ? ' sel' : '');
+      chip.textContent = value;
+      chip.dataset.value = value;
+      chip.addEventListener('click', () => {
+        const v = chip.dataset.value;
+        if(selectedSet.has(v)) selectedSet.delete(v);
+        else selectedSet.add(v);
+        chip.classList.toggle('sel');
+      });
+      bank.appendChild(chip);
+    });
+  }
+
+  function syncChips(containerId, selectedSet){
+    bySel(`#${containerId} .chip`).forEach(chip => {
+      chip.classList.toggle('sel', selectedSet.has(chip.dataset.value));
+    });
+  }
+
+  function buildLetterBank(){
+    buildWordBank('letterBank', alphabet, app.banks.selectedLetters);
+  }
+
+  function buildHFCategoryTabs(){
+    const tabs = $('hfTabs');
+    tabs.innerHTML = '';
+    Object.keys(HF_CATS).forEach(category => {
+      const tab = document.createElement('span');
+      tab.className = 'tab' + (category === app.ui.activeHF ? ' active' : '');
+      tab.textContent = category;
+      tab.addEventListener('click', () => {
+        app.ui.activeHF = category;
+        buildHFCategoryTabs();
+        buildHFWordList();
+      });
+      tabs.appendChild(tab);
+    });
+  }
+
+  function buildHFWordList(){
+    buildWordBank('bankHF', HF_CATS[app.ui.activeHF] || [], app.banks.selectedHF);
+  }
+
+  function normalizeWordList(raw){
+    return unique(String(raw || '').split(/[\n,;]+/).map(x => x.trim().toLowerCase()).filter(Boolean));
+  }
+
+  function refreshWriteBank(){
+    const valid = new Set(getWriteWords());
+    app.banks.selectedWrite = new Set([...app.banks.selectedWrite].filter(word => valid.has(word)));
+    buildWordBank('writeBank', getWriteWords(), app.banks.selectedWrite);
+  }
+
+  function addCustomWriteWords(){
+    const words = normalizeWordList($('writeCustomWords').value);
+    if(!words.length){
+      showStatus('Skriv inn minst ett ord.', 'warn');
+      return;
+    }
+    state.customWriteWords = words;
+    words.forEach(word => app.banks.selectedWrite.add(word));
+    persist();
+    refreshWriteBank();
+    showStatus('Egne skriveord er lagret.', 'ok');
+  }
+
+  function clearCustomWriteWords(){
+    state.customWriteWords = [];
+    $('writeCustomWords').value = '';
+    persist();
+    refreshWriteBank();
+    showStatus('Egne skriveord er fjernet.', 'ok');
+  }
+
+  function randomItemsFromSet(selectedSet, length){
+    const selected = Array.from(selectedSet);
+    if(!selected.length){
+      showStatus('Velg minst ett element.', 'warn');
+      return null;
+    }
+    const safeLength = clamp(Number(length) || 120, 1, 120);
+    const out = [];
+    for(let i = 0; i < safeLength; i++){
+      out.push(selected[Math.floor(Math.random() * selected.length)]);
+    }
     return out;
   }
-  const HF_ALL=['og','i','det','på','som','er','en','til','å','han','av','for','med','at','var','de','ikke','den','har','jeg','om','et','men','så','seg','du','kan','da','ble','ut','skal','vil','ham','etter','over','ved','også','bare','eller','sa','nå','dette','noe','være','meg','mot','opp','der','når','inn','dem','kunne','andre','blir','alle','noen','sin','ha','år','henne','må','selv','sier','få','kom','denne','enn','to','hans','bli','ville','før','vært','skulle','går','her','slik','gikk','mer','hva','igjen','fikk','man','alt','mange','dash','ingen','får','oss','hvor','under','siden','hele','dag','gang','sammen','ned','kommer','sine','deg','se','første','godt','mellom','måtte','gå','helt','litt','nok','store','aldri','ta','sig','uten','ho','kanskje','blitt','ser','hvis','bergen','sitt','jo','vel','si','vet','hennes','min','tre','ja','samme','mye','nye','tok','gjøre','disse','siste','tid','rundt','tilbake','mens','satt','flere','folk','1','fordi','både','la','gjennom','fått','like','nei','annet','komme','kroner','gjorde','hvordan','2','norge','norske','gjør','oslo','står','stor','gamle','langt','annen','sett','først','mener','hver','barn','rett','ny','tatt','derfor','fram','hos','heller','lenge','alltid','tror','nesten','mann','gi','god','lå','blant','norsk','gjort','visste','bak','tar','liv','mennesker','frem','bort','ein','verden','deres','ikkje','000','tiden','del','vår','mest','eneste','likevel','hatt','dei','tidligere','fire','liten','hvorfor','tenkte','hverandre','holdt','bedre','meget','ting','lite','3','stod','ei','hvert','begynte','gir','ligger','grunn','dere','livet','a','sagt','land','4','kommet','e','neste','far','efter','egen','side','gått','mor','ute','videre','5','millioner','prosent','svarte','sto','begge','allerede','inne','finne','enda','hjem','foran','måte','10','mannen','dagen','hodet','saken','ganger','kjente','stort','blev','mindre','20','landet','byen','plass','kveld','ord','øynene','fem','større','gode','nu','synes','beste','kvinner','ett','satte','hvem','all','9','klart','holde','ofte','stille','spurte','lenger','sted','dager','mulig','utenfor','små','frå','nytt','slike','viser','30','mig','kjenner','samtidig','senere','særlig','våre','akkurat','menn','hørte','mdash','arbeidet','altså','par','din','unge','n','borte','plutselig','fant','fast','kunde','snart','svært','fall','vei','bergens','dessuten','forhold','gjerne','snakket','foto','6','snakke','bør','dersom','imidlertid','lett','tenke','gud','tro','15','jan','gitt','penger','egentlig','mitt','ønsker','ansiktet','kl','dermed','00','slo','12','politiet','faren','eit','bra','je','sitter','sikkert','vite','full','lille','18','glad','fleste','slutt','ene','mine','gjelder','lagt','virkelig','laget','alene','ennå','lang','ganske','johan','omkring','hjemme','vårt','vanskelig','arne','gammel','skulde','tidende','riktig','huset','følte','møte','lørdag','klar','m','kort','viktig','ellers','minst','fortsatt','op','veien','seier','mål','kjent','slags','frode','8','7','stund','arbeid','finnes','ingenting','lange','gangen','stå','lot','rekke','redd','høre','vilde','ga','ti','forteller','overfor','stadig','burde','visst','syntes','fjor','sette','funnet','hjelp','største','løpet','meter','norges','hånden','spørsmål','s','mente','søndag','f','følge','fremdeles','imot','11','hus','kvinne','ventet','reiste','hendene','trodde','usa','legger','viste','regjeringen','eg','årene','eksempel','tenkt','ole','slikt','erik','moren','holder','seks'];
-  // Fjern enkeltbokstaver og tall (beholder kun ord med minst 2 bokstaver)
-  const HF_CLEAN = HF_ALL.filter(w => /^[a-zæøå\-]{2,}$/i.test(w));
-  const HF_CATS={}; for(let i=0;i<HF_CLEAN.length;i+=10){ HF_CATS[`HF-${String(i/10+1).padStart(2,'0')}`]=HF_CLEAN.slice(i,i+10); }
-  let activeHF=Object.keys(HF_CATS)[0]||'HF-01';
 
-  let mode='text';
-  let tokens=[]; let lastIdx=null; let mistakes=new Set();
-  let swInt=null, swSec=0, swRunning=false, swPreparing=false;
-  let cdInt=null, cdLeft=60, cdInit=60, cdRunning=false, cdPreparing=false;
-  let finishedThisRound=false; let spinsLeftRound=0;
-  let selectedLetters=new Set(); let selectedDip=new Set(); let selectedGraf=new Set(); let selectedHF=new Set(); let selectedWrite=new Set(getWriteWords());
-  let originalTokens=[]; let lastClickedIdx=null; let currentTest=null;
-  let writeFlashSec=5; let writeQueue=[]; let writeIndex=0; let currentWriteWord=''; let writeCorrect=0; let writeWrong=0; let writeActive=false; let writeAnswered=false;
+  function shuffle(list){
+    const arr = [...list];
+    for(let i = arr.length - 1; i > 0; i--){
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
 
-  window.addEventListener('DOMContentLoaded', init);
+  function renderSequence(list, {flash = false} = {}){
+    state.prevSeq = list.join('|');
+    persist();
+    resetReadingMarks();
+    setPostRoundBar(false);
+    app.ui.currentTest = null;
+    hideStatus();
+    if(flash){
+      startFlashcards(list);
+      return;
+    }
+    renderTokens(list);
+  }
 
-  function init(){
-    bindModeButtons();
-    buildLetterBank();
-    buildWordBank('bankDip', DIFTONG_ORD, selectedDip);
-    buildWordBank('bankGraf', GRAFEM_ORD, selectedGraf);
-    buildHF();
-    buildWordBank('writeBank', getWriteWords(), selectedWrite);
-    $('writeCustomWords').value = (S.customWriteWords||[]).join('\n');
-    updateTestPreview();
+  function startFlashcards(list){
+    app.flashcards.active = true;
+    app.flashcards.cards = [...list];
+    app.flashcards.readCount = 0;
+    app.ui.flashOriginMode = app.ui.mode;
+    resetReadingMarks();
+    $('readSharedArea').style.display = 'block';
+    $('wordDisplay').style.display = 'none';
+    $('flashcardArea').style.display = 'block';
+    $('flashcardWord').textContent = 'klar';
+    $('flashcardProg').textContent = `Kort 0 av ${app.flashcards.cards.length}`;
+    $('flashDrillStartBtn').disabled = false;
+    $('flashNextCardBtn').disabled = true;
+    $('flashcardArea').focus();
+    updateCounts();
+  }
+
+  function stopFlashcards(resetState = true){
+    $('flashcardArea').style.display = 'none';
+    $('wordDisplay').style.display = 'block';
+    $('flashNextCardBtn').disabled = true;
+    if(resetState){
+      app.flashcards.active = false;
+      app.flashcards.cards = [];
+      app.flashcards.readCount = 0;
+      app.ui.flashOriginMode = '';
+    }
+  }
+
+  function startFlashDrill(){
+    if(!app.flashcards.active || !app.flashcards.cards.length) return;
+    app.flashcards.readCount = 0;
+    resetReadingMarks();
+    updateCounts();
+    $('flashDrillStartBtn').disabled = true;
+    $('flashNextCardBtn').disabled = false;
+    $('flashcardArea').focus();
+    resetCountdown();
+    startCountdownPrep();
+  }
+
+  function advanceFlashDrill(){
+    if(!app.flashcards.active || !app.timer.cdRunning) return;
+    if(app.flashcards.readCount < app.flashcards.cards.length){
+      $('flashcardWord').textContent = app.flashcards.cards[app.flashcards.readCount];
+      app.flashcards.readCount++;
+      $('flashcardProg').textContent = `Kort ${app.flashcards.readCount} av ${app.flashcards.cards.length}`;
+      updateCounts();
+      $('flashcardArea').focus();
+    }
+  }
+
+  function showOverlayStep(text){
+    $('startOverlay').style.display = 'flex';
+    $('startOverlay').textContent = text;
+  }
+
+  function hideOverlay(){
+    $('startOverlay').style.display = 'none';
+  }
+
+  function runStartOverlay(onDone){
+    let count = 3;
+    showOverlayStep(count);
+    const prep = setInterval(() => {
+      count--;
+      if(count > 0) showOverlayStep(count);
+      else if(count === 0) showOverlayStep('LES!');
+      else {
+        clearInterval(prep);
+        hideOverlay();
+        onDone();
+      }
+    }, 1000);
+  }
+
+  function clearForNewTimedRound(){
+    resetReadingMarks();
+    setPostRoundBar(false);
+    hideStatus();
+    if(shouldLock()) setClickable(false);
+  }
+
+  function startStopwatchPrep(){
+    if(app.timer.swRunning || app.timer.swPreparing) return;
+    app.timer.swPreparing = true;
+    $('swStart').disabled = true;
+    clearForNewTimedRound();
+    runStartOverlay(() => {
+      app.timer.swPreparing = false;
+      $('swStart').disabled = false;
+      startStopwatch();
+    });
+  }
+
+  function startStopwatch(){
+    app.timer.swRunning = true;
+    app.timer.swSec = 0;
+    $('swTime').textContent = '00:00';
+    app.timer.swInt = setInterval(() => {
+      app.timer.swSec++;
+      $('swTime').textContent = formatTime(app.timer.swSec);
+    }, 1000);
+  }
+
+  function stopStopwatch(){
+    if(!app.timer.swRunning) return;
+    clearInterval(app.timer.swInt);
+    app.timer.swRunning = false;
+    app.reading.finishedThisRound = true;
+    setClickable(true);
+    showStatus('Stoppeklokka stoppet. Marker feil og klikk Avslutt omgang.', 'warn');
+    setPostRoundBar(true);
+  }
+
+  function resetStopwatch(){
+    if(app.timer.swRunning){
+      clearInterval(app.timer.swInt);
+      app.timer.swRunning = false;
+    }
+    app.timer.swSec = 0;
+    $('swTime').textContent = '00:00';
+    setClickable(true);
+  }
+
+  function setCountdown(seconds){
+    app.timer.cdInit = seconds;
+    app.timer.cdLeft = seconds;
+    $('cdTime').textContent = formatTime(app.timer.cdLeft);
+  }
+
+  function startCountdownPrep(){
+    if(app.timer.cdRunning || app.timer.cdPreparing) return;
+    app.timer.cdPreparing = true;
+    $('cdStart').disabled = true;
+    clearForNewTimedRound();
+    runStartOverlay(() => {
+      app.timer.cdPreparing = false;
+      $('cdStart').disabled = false;
+      startCountdown();
+    });
+  }
+
+  function startCountdown(){
+    app.timer.cdRunning = true;
+    $('cdTime').textContent = formatTime(app.timer.cdLeft);
+    app.timer.cdInt = setInterval(() => {
+      if(app.timer.cdLeft > 0){
+        app.timer.cdLeft--;
+        $('cdTime').textContent = formatTime(app.timer.cdLeft);
+      }
+      if(app.timer.cdLeft <= 0){
+        clearInterval(app.timer.cdInt);
+        app.timer.cdRunning = false;
+        app.reading.finishedThisRound = true;
+        setClickable(true);
+        if(app.flashcards.active){
+          $('flashDrillStartBtn').disabled = false;
+          $('flashNextCardBtn').disabled = true;
+          $('flashcardWord').textContent = 'ferdig';
+          $('flashcardArea').focus();
+          showStatus('Tiden er ute. Marker eventuelle feil og klikk Avslutt omgang.', 'warn');
+        }else{
+          showStatus('Tiden er ute. Marker feil og klikk siste.', 'warn');
+        }
+        setPostRoundBar(true);
+      }
+    }, 1000);
+  }
+
+  function pauseCountdown(){
+    if(!app.timer.cdRunning) return;
+    clearInterval(app.timer.cdInt);
+    app.timer.cdRunning = false;
+    setClickable(true);
+  }
+
+  function resetCountdown(){
+    if(app.timer.cdRunning){
+      clearInterval(app.timer.cdInt);
+      app.timer.cdRunning = false;
+    }
+    setCountdown(app.timer.cdInit || 60);
+    setClickable(true);
+  }
+
+  function calculateRatePerMinute(count, timeSec){
+    if(timeSec <= 0) return 0;
+    return Math.round((count * 60) / timeSec);
+  }
+
+  function getRoundTimeSec(){
+    const stopwatchUsed = app.timer.swSec > 0;
+    const countdownUsed = (app.timer.cdInit - app.timer.cdLeft) > 0;
+    if(countdownUsed) return app.timer.cdInit - app.timer.cdLeft;
+    if(stopwatchUsed) return app.timer.swSec;
+    return 0;
+  }
+
+  function collectRoundMistakes(){
+    const roundMistakes = [];
+    app.reading.mistakes.forEach(i => {
+      const counted = app.flashcards.active ? (i < app.flashcards.readCount) : (app.reading.lastIdx !== null && i <= app.reading.lastIdx);
+      if(!counted) return;
+      const word = app.flashcards.active ? app.flashcards.cards[i] : app.reading.tokens[i];
+      if(word && !roundMistakes.includes(word)) roundMistakes.push(word);
+    });
+    return roundMistakes;
+  }
+
+  function getModeLabel(){
+    if(app.ui.currentTest) return `test-${app.ui.currentTest.type}`;
+    if(app.flashcards.active) return `${app.ui.flashOriginMode}-flash-drill`;
+    return app.ui.mode;
+  }
+
+  function rewardRound(wpm, prevBest){
+    const coins = wpm > prevBest ? 10 : 3;
+    state.coins = (state.coins || 0) + coins;
+    if(wpm > prevBest){
+      state.lightning = (state.lightning || 0) + 1;
+      addDiamondProgress(Math.min(3, Math.max(1, Math.floor((wpm - prevBest) / 5))));
+    }
+    state.bestWPM = Math.max(prevBest, wpm);
+    state.roundCount = (state.roundCount || 0) + 1;
+    return coins;
+  }
+
+  function saveRoundResult(metrics){
+    state.rounds.push({
+      ts: Date.now(),
+      timeSec: metrics.timeSec,
+      total: metrics.total,
+      errors: metrics.err,
+      correct: metrics.corr,
+      wpm: metrics.wpm,
+      coins: metrics.coins,
+      lastIdx: app.flashcards.active ? null : app.reading.lastIdx,
+      fpm: metrics.fpm,
+      cpm: metrics.cpm,
+      mode: getModeLabel()
+    });
+  }
+
+  function buildSummary(test, metrics, mistakeWords){
+    return [
+      `Lesetest (${test.type === 'pre' ? 'Pre-test' : 'Post-test'}) — ${test.nivå} — «${test.tittel}»`,
+      `Tid brukt: ${formatTime(metrics.timeSec)} (${metrics.timeSec} sekunder)`,
+      `Antall leste ord: ${metrics.total}`,
+      `Feil: ${metrics.err} | Korrekte: ${metrics.corr}`,
+      `Feil per minutt: ${metrics.fpm} | Korrekte per minutt: ${metrics.cpm}`,
+      `K-OPM: ${metrics.wpm}`,
+      `Feilord: ${(mistakeWords && mistakeWords.length) ? mistakeWords.join(', ') : 'Ingen'}`
+    ].join('\n');
+  }
+
+  function finalizeRound(){
+    const timeSec = getRoundTimeSec();
+    if(timeSec <= 0){
+      showStatus('Start en av klokkene først.', 'warn');
+      return;
+    }
+
+    const total = app.flashcards.active ? app.flashcards.readCount : (app.reading.lastIdx === null ? 0 : app.reading.lastIdx + 1);
+    if(total <= 0){
+      showStatus(app.flashcards.active ? 'Trykk spacebar eller Neste kort først.' : 'Marker siste leste først.', 'warn');
+      return;
+    }
+
+    const { err, corr } = getRoundCounts();
+    const wpm = calculateRatePerMinute(corr, timeSec);
+    const fpm = calculateRatePerMinute(err, timeSec);
+    const cpm = calculateRatePerMinute(corr, timeSec);
+    const prevBest = state.bestWPM || 0;
+    const coins = rewardRound(wpm, prevBest);
+    const mistakeWords = collectRoundMistakes();
+
+    state.prevLastIdx = app.flashcards.active ? null : app.reading.lastIdx;
+    state.lastMistakes = mistakeWords;
+    mistakeWords.forEach(word => {
+      if(!state.wordBank.includes(word)) state.wordBank.push(word);
+    });
+
+    const metrics = { timeSec, total, err, corr, wpm, fpm, cpm, coins };
+    saveRoundResult(metrics);
+    persist();
+    updateTopStats();
+    rebuildResultsTable();
+
+    app.reward.spinsLeftRound = 3;
+    openSlotAuto();
+
+    if(state.lastMistakes.length) setTimeout(openMistakeFlashModal, 800);
+    if(app.ui.currentTest){
+      $('summaryText').value = buildSummary(app.ui.currentTest, metrics, mistakeWords);
+      $('summaryModal').classList.add('active');
+    }
+
+    resetAfterFinalize();
+  }
+
+  function resetAfterFinalize(){
+    app.reading.finishedThisRound = false;
+    resetReadingMarks();
+    updateCounts();
+    setPostRoundBar(false);
+    app.ui.currentTest = null;
+    resetStopwatch();
+    resetCountdown();
+    stopFlashcards();
+    showStatus('Omgangen er lagret.', 'ok');
+  }
+
+  function openMistakeFlashModal(){
+    const list = [...(state.lastMistakes || [])];
+    if(!list.length){
+      showStatus('Ingen feil fra siste omgang.', 'ok');
+      return;
+    }
+    let idx = 0;
+    $('flashModal').classList.add('active');
+    const render = () => {
+      $('flashWord').textContent = list[idx];
+      $('flashProg').textContent = `Ord ${idx + 1} av ${list.length}`;
+    };
+    render();
+    $('flashNext').onclick = () => {
+      idx = (idx + 1) % list.length;
+      render();
+    };
+    $('flashDone').onclick = () => $('flashModal').classList.remove('active');
+  }
+
+  function updateTestPreview(){
+    const d = TEST_TEXTS[$('testText').value];
+    $('testPreview').textContent = d ? `${d.nivå} — «${d.tittel}» — ${d.tekst}` : '';
+  }
+
+  function loadTestText(){
+    const key = $('testText').value;
+    const type = $('testType').value;
+    const test = TEST_TEXTS[key];
+    if(!test) return;
+    setMode('test');
+    const arr = test.tekst.split(/\s+/).filter(Boolean);
+    renderTokens(arr);
+    app.reading.savedOriginal = [...arr];
+    state.savedOriginal = [...arr];
+    persist();
+    resetReadingMarks();
+    setPostRoundBar(false);
+    app.ui.currentTest = { type, key, nivå:test.nivå, tittel:test.tittel };
+    showStatus('Testtekst er lastet inn.', 'ok');
+  }
+
+  function setWriteSeconds(sec){
+    app.write.flashSec = clamp(Number(sec) || 0, 0, 20);
+    $('writeCustomSec').value = app.write.flashSec;
     updateWriteUI();
+  }
 
-    $('prepareBtn').addEventListener('click', onPrepareText);
-    $('toggleOrderBtn').addEventListener('click', onToggleOrder);
-    $('resetRoundBtn').addEventListener('click', ()=>{ clearMarks(); updateCounts(); hidePostRoundBar(); applyPrevMarker(); resetWriteStageOnly(); });
-    $('finishBtn').addEventListener('click', ()=>{ if(lastIdx==null){ alert('Klikk på siste ord/element først.'); return; } finalize(); });
+  function updateWriteUI(){
+    $('writeSecView').textContent = app.write.flashSec + 's';
+    $('writeCorrect').textContent = app.write.correct;
+    $('writeWrong').textContent = app.write.wrong;
+    $('writeLeft').textContent = Math.max(0, app.write.queue.length - app.write.index);
+    ['write1','write3','write5'].forEach(id => $(id).classList.remove('purple'));
+    if(app.write.flashSec === 1) $('write1').classList.add('purple');
+    if(app.write.flashSec === 3) $('write3').classList.add('purple');
+    if(app.write.flashSec === 5) $('write5').classList.add('purple');
+  }
 
-    $('swStart').addEventListener('click', startSWPrep);
-    $('swStop').addEventListener('click', stopSW);
-    $('swReset').addEventListener('click', resetSW);
+  function resetWriteStage(){
+    app.write.answered = false;
+    app.write.currentWord = '';
+    $('writePrompt').textContent = 'Velg ord og start økta.';
+    $('writeFlash').textContent = 'klar';
+    $('writeFlash').classList.remove('hiddenWord');
+    $('writeAnswer').value = '';
+    $('writeAnswer').disabled = true;
+    $('checkWriteBtn').disabled = true;
+    $('nextWriteBtn').disabled = true;
+    $('writeFeedback').textContent = '';
+    updateWriteUI();
+  }
 
-    $('q10').addEventListener('click', ()=>setCountdown(10));
-    $('q30').addEventListener('click', ()=>setCountdown(30));
-    $('q60').addEventListener('click', ()=>setCountdown(60)); setCountdown(60);
-    $('cdStart').addEventListener('click', startCDPrep);
-    $('cdPause').addEventListener('click', pauseCD);
-    $('cdReset').addEventListener('click', resetCD);
+  function startWriteTraining(){
+    const chosen = [...app.banks.selectedWrite];
+    const len = clamp(+$('writeLen').value || 10, 1, 30);
+    if(!chosen.length){
+      showStatus('Velg minst ett skriveord.', 'warn');
+      return;
+    }
+    app.write.queue = [];
+    app.write.index = 0;
+    app.write.correct = 0;
+    app.write.wrong = 0;
+    for(let i = 0; i < len; i++){
+      app.write.queue.push(chosen[Math.floor(Math.random() * chosen.length)]);
+    }
+    nextWriteWord();
+  }
 
-    $('selectVowels').addEventListener('click', ()=>{ vowels.forEach(c=>selectedLetters.add(c)); syncChips('letterBank',selectedLetters); });
-    $('selectConsonants').addEventListener('click', ()=>{ consonants.forEach(c=>selectedLetters.add(c)); syncChips('letterBank',selectedLetters); });
-    $('clearLetters').addEventListener('click', ()=>{ selectedLetters.clear(); syncChips('letterBank',selectedLetters); });
-    $('genLetters').addEventListener('click', ()=>genFromSet(selectedLetters, +$('lenLetters').value||120));
+  function focusWriteAnswerSoon(){
+    setTimeout(() => $('writeAnswer').focus(), 30);
+  }
 
-    $('selectAllDip').addEventListener('click', ()=>{ DIFTONG_ORD.forEach(x=>selectedDip.add(x)); syncChips('bankDip',selectedDip); });
-    $('clearAllDip').addEventListener('click', ()=>{ selectedDip.clear(); syncChips('bankDip',selectedDip); });
-    $('genDip').addEventListener('click', ()=>genFromSet(selectedDip, +$('lenDip').value||120));
+  function nextWriteWord(){
+    if(app.write.index >= app.write.queue.length){
+      finishWriteTraining();
+      return;
+    }
+    app.write.answered = false;
+    app.write.currentWord = app.write.queue[app.write.index];
+    $('writePrompt').textContent = `Ord ${app.write.index + 1} av ${app.write.queue.length}`;
+    $('writeFlash').classList.remove('hiddenWord');
+    $('writeFlash').textContent = app.write.currentWord;
+    $('writeAnswer').value = '';
+    $('writeAnswer').disabled = true;
+    $('checkWriteBtn').disabled = true;
+    $('nextWriteBtn').disabled = true;
+    $('writeFeedback').textContent = '';
+    setTimeout(() => {
+      $('writeFlash').textContent = '•••';
+      $('writeFlash').classList.add('hiddenWord');
+      $('writeAnswer').disabled = false;
+      $('checkWriteBtn').disabled = false;
+      focusWriteAnswerSoon();
+    }, app.write.flashSec * 1000);
+    updateWriteUI();
+  }
 
-    $('selectAllGraf').addEventListener('click', ()=>{ GRAFEM_ORD.forEach(x=>selectedGraf.add(x)); syncChips('bankGraf',selectedGraf); });
-    $('clearAllGraf').addEventListener('click', ()=>{ selectedGraf.clear(); syncChips('bankGraf',selectedGraf); });
-    $('genGraf').addEventListener('click', ()=>genFromSet(selectedGraf, +$('lenGraf').value||120));
-
-    $('selectAllHF').addEventListener('click', ()=>{ (HF_CATS[activeHF]||[]).forEach(x=>selectedHF.add(x)); syncChips('bankHF',selectedHF); });
-    $('clearAllHF').addEventListener('click', ()=>{ selectedHF.clear(); syncChips('bankHF',selectedHF); });
-    $('genHF').addEventListener('click', ()=>genFromSet(selectedHF, +$('lenHF').value||120));
-
-    $('testText').addEventListener('change', updateTestPreview);
-    $('loadTestBtn').addEventListener('click', loadTestText);
-
-    $('openSlotBtn').addEventListener('click', openSlot);
-    $('slotClose').addEventListener('click', closeSlot);
-    $('slotSpin').addEventListener('click', spinSlot);
-    $('flashBtn').addEventListener('click', openFlash);
-
-    $('closeSummaryBtn').addEventListener('click', ()=>{ $('summaryModal').classList.remove('active'); });
-    $('copySummaryBtn').addEventListener('click', ()=>{ const ta=$('summaryText'); ta.select(); ta.setSelectionRange(0,99999); document.execCommand('copy'); alert('Oppsummering kopiert.'); });
-
-    $('exportCsvBtn').addEventListener('click', exportCSV);
-    $('clearDataBtn').addEventListener('click', ()=>{ if(confirm('Slette alle resultater? (Poeng/diamantstatus beholdes)')){ S.rounds=[]; save(); rebuildResults(); } });
-    $('resetAllBtn').addEventListener('click', fullReset);
-
-    $('setStudentBtn').addEventListener('click', setStudentFromInput);
-    $('studentSelect').addEventListener('change', onStudentSelectChange);
-    $('studentInput').value = S.currentStudent || '';
-    rebuildStudentSelect();
-
-    $('write1').addEventListener('click', ()=>setWriteSeconds(1));
-    $('write3').addEventListener('click', ()=>setWriteSeconds(3));
-    $('write5').addEventListener('click', ()=>setWriteSeconds(5));
-    $('applyWriteCustom').addEventListener('click', ()=>{
-      const v = Math.min(20, Math.max(0, +$('writeCustomSec').value || 0));
-      $('writeCustomSec').value = v;
-      setWriteSeconds(v);
+  function logWriteResult(ok){
+    state.rounds.push({
+      ts: Date.now(),
+      timeSec: app.write.flashSec,
+      total: 1,
+      errors: ok ? 0 : 1,
+      correct: ok ? 1 : 0,
+      wpm: 0,
+      coins: ok ? 1 : 0,
+      lastIdx: 0,
+      fpm: (ok || app.write.flashSec <= 0) ? 0 : Math.round(60 / app.write.flashSec),
+      cpm: (!ok || app.write.flashSec <= 0) ? 0 : Math.round(60 / app.write.flashSec),
+      mode: `skriving-${app.write.flashSec}s`
     });
-    $('writeCustomSec').addEventListener('keydown', e=>{
-      if(e.key==='Enter') $('applyWriteCustom').click();
-    });
-    $('selectAllWrite').addEventListener('click', ()=>{ getWriteWords().forEach(w=>selectedWrite.add(w)); syncChips('writeBank',selectedWrite); });
-    $('clearAllWrite').addEventListener('click', ()=>{ selectedWrite.clear(); syncChips('writeBank',selectedWrite); });
-    $('addWriteWordsBtn').addEventListener('click', addCustomWriteWords);
-    $('clearCustomWriteWordsBtn').addEventListener('click', clearCustomWriteWords);
-    $('startWriteBtn').addEventListener('click', startWriteTraining);
-    $('checkWriteBtn').addEventListener('click', checkWriteAnswer);
-    $('nextWriteBtn').addEventListener('click', nextWriteWord);
-    $('writeAnswer').addEventListener('keydown', e=>{ if(e.key==='Enter' && !$('checkWriteBtn').disabled) checkWriteAnswer(); });
+    state.roundCount = (state.roundCount || 0) + 1;
+  }
 
-    updateTop(); updateDiamondBar(); rebuildResults();
-    document.addEventListener('keydown', e=>{
-      if(e.key==='Enter' && mode!=='write' && lastClickedIdx!=null){
-        if(finishedThisRound && lastIdx===lastClickedIdx){ finalize(); }
-        else setLast(lastClickedIdx,true);
+  function checkWriteAnswer(){
+    if(app.write.answered) return;
+    const guess = normalizeText($('writeAnswer').value);
+    if(!guess){
+      showStatus('Skriv ordet først.', 'warn');
+      return;
+    }
+    const ok = guess === normalizeText(app.write.currentWord);
+    app.write.answered = true;
+    $('writeAnswer').disabled = true;
+    $('checkWriteBtn').disabled = true;
+    $('nextWriteBtn').disabled = false;
+
+    if(ok){
+      app.write.correct++;
+      $('writeFeedback').textContent = 'Riktig!';
+      $('writeFeedback').className = 'ok';
+      state.coins = (state.coins || 0) + 1;
+      if(Math.random() < 0.2) addDiamondProgress(1);
+    }else{
+      app.write.wrong++;
+      $('writeFeedback').textContent = `Feil. Ordet var «${app.write.currentWord}».`;
+      $('writeFeedback').className = 'bad';
+    }
+
+    logWriteResult(ok);
+    persist();
+    updateTopStats();
+    rebuildResultsTable();
+    app.write.index++;
+    updateWriteUI();
+  }
+
+  function finishWriteTraining(){
+    $('writePrompt').textContent = 'Økta er ferdig.';
+    $('writeFlash').classList.remove('hiddenWord');
+    $('writeFlash').textContent = 'ferdig';
+    $('writeAnswer').disabled = true;
+    $('checkWriteBtn').disabled = true;
+    $('nextWriteBtn').disabled = true;
+    $('writeFeedback').textContent = `Du fikk ${app.write.correct} av ${app.write.correct + app.write.wrong} riktige.`;
+  }
+
+  function openSlot(){
+    $('slotModal').classList.add('active');
+    $('slotMsg').textContent = 'Trykk Spinn';
+    updateSpinUI();
+  }
+
+  function closeSlot(){
+    $('slotModal').classList.remove('active');
+  }
+
+  const symbols = ['🍒','🍋','🔔','⭐','7️⃣','🍀'];
+
+  function updateSpinUI(){
+    $('slotSpin').textContent = app.reward.spinsLeftRound > 0 ? `Spinn (${app.reward.spinsLeftRound} igjen)` : 'Ingen sjanser igjen';
+    $('slotSpin').disabled = app.reward.spinsLeftRound <= 0;
+    $('openSlotBtn').classList.toggle('hide', app.reward.spinsLeftRound <= 0);
+  }
+
+  function openSlotAuto(){
+    $('openSlotBtn').classList.remove('hide');
+    openSlot();
+  }
+
+  function spinSlot(){
+    if(app.reward.spinsLeftRound <= 0) return;
+    let t = 0;
+    const spin = setInterval(() => {
+      $('reel1').textContent = symbols[Math.floor(Math.random() * symbols.length)];
+      $('reel2').textContent = symbols[Math.floor(Math.random() * symbols.length)];
+      $('reel3').textContent = symbols[Math.floor(Math.random() * symbols.length)];
+      if(++t > 12){
+        clearInterval(spin);
+        const win = Math.random() < 0.30;
+        if(win){
+          $('reel1').textContent = '💎';
+          $('reel2').textContent = '💎';
+          $('reel3').textContent = '💎';
+          $('slotMsg').textContent = 'JACKPOT!';
+          state.diamonds = (state.diamonds || 0) + 1;
+          if(state.diamonds >= 10){
+            alert('🎁 10 diamanter! Premie fra læreren!');
+            state.diamonds = 0;
+          }
+          persist();
+          updateTopStats();
+        }else{
+          $('reel1').textContent = '❌';
+          $('reel2').textContent = '❌';
+          $('reel3').textContent = '❌';
+          $('slotMsg').textContent = 'Ingen jackpot.';
+        }
+        app.reward.spinsLeftRound = Math.max(0, app.reward.spinsLeftRound - 1);
+        updateSpinUI();
+      }
+    }, 90);
+  }
+
+  function exportCSV(){
+    const rows = [["#","Dato/tid","Tid (s)","Antall","Feil","Feil/min","Korrekte","K-OPM","Poeng","Modus"]];
+    (state.rounds || []).forEach((r, i) => rows.push([i + 1, new Date(r.ts).toISOString(), r.timeSec, r.total, r.errors, r.fpm, r.correct, r.wpm, r.coins, r.mode]));
+    const csv = rows.map(r => r.map(x => {
+      const s = String(x ?? '');
+      return /[",;\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    }).join(';')).join('\n');
+    const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'lesetrening-resultater.csv';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }
+
+  function fullReset(){
+    const code = prompt('Full nullstilling sletter alt. Skriv koden:');
+    if(code === '1985'){
+      state = structuredClone(defaultState);
+      persist();
+      app.banks.selectedWrite = new Set(getWriteWords());
+      updateTopStats();
+      rebuildResultsTable();
+      renderTokens([]);
+      resetReadingMarks();
+      updateCounts();
+      setPostRoundBar(false);
+      resetStopwatch();
+      resetCountdown();
+      $('writeCustomWords').value = '';
+      refreshWriteBank();
+      resetWriteStage();
+      showStatus('Alt er nullstilt.', 'ok');
+    }else if(code !== null){
+      showStatus('Feil kode.', 'warn');
+    }
+  }
+
+  function loadPreparedText(){
+    const text = $('inputText').value.trim();
+    if(!text){
+      showStatus('Lim inn tekst først.', 'warn');
+      return;
+    }
+    const arr = text.split(/\s+/).filter(Boolean);
+    app.reading.savedOriginal = [...arr];
+    state.savedOriginal = [...arr];
+    persist();
+    const rendered = $('scrambleChk').checked ? shuffle(arr) : arr;
+    renderTokens(rendered);
+    resetReadingMarks();
+    setPostRoundBar(false);
+    $('toggleOrderBtn').classList.remove('hide');
+    $('toggleOrderBtn').textContent = $('scrambleChk').checked ? 'Vis original rekkefølge' : 'Bland ord';
+    app.ui.currentTest = null;
+    showStatus('Teksten er klargjort.', 'ok');
+  }
+
+  function toggleOriginalOrder(){
+    const base = (state.savedOriginal || []).length ? [...state.savedOriginal] : [];
+    if(!base.length) return;
+    const showOriginal = $('toggleOrderBtn').textContent.startsWith('Vis');
+    renderTokens(showOriginal ? base : shuffle(base));
+    resetReadingMarks();
+    $('toggleOrderBtn').textContent = showOriginal ? 'Bland ord' : 'Vis original rekkefølge';
+  }
+
+  function resetRoundOnly(){
+    stopFlashcards();
+    resetReadingMarks();
+    updateCounts();
+    setPostRoundBar(false);
+    resetWriteStage();
+    hideStatus();
+  }
+
+  function maybeGenerateFromBank(selectedSet, len, flashCheckboxId){
+    const list = randomItemsFromSet(selectedSet, len);
+    if(!list) return;
+    renderSequence(list, { flash: $(flashCheckboxId).checked });
+  }
+
+  function copySummary(){
+    navigator.clipboard.writeText($('summaryText').value)
+      .then(() => showStatus('Oppsummering kopiert.', 'ok'))
+      .catch(() => showStatus('Klarte ikke å kopiere.', 'warn'));
+  }
+
+  function bindEvents(){
+    $('modeText').onclick = () => setMode('text');
+    $('modeLetters').onclick = () => setMode('letters');
+    $('modeDip').onclick = () => setMode('dip');
+    $('modeGraf').onclick = () => setMode('graf');
+    $('modeHF').onclick = () => setMode('hf');
+    $('modeTest').onclick = () => setMode('test');
+    $('modeWrite').onclick = () => setMode('write');
+
+    $('prepareBtn').onclick = loadPreparedText;
+    $('toggleOrderBtn').onclick = toggleOriginalOrder;
+    $('resetRoundBtn').onclick = resetRoundOnly;
+    $('finishBtn').onclick = () => {
+      if(!app.flashcards.active && !app.timer.swRunning && !app.timer.cdRunning && !app.reading.finishedThisRound && app.reading.lastIdx == null){
+        showStatus('Marker siste leste først.', 'warn');
+        return;
+      }
+      finalizeRound();
+    };
+
+    $('swStart').onclick = startStopwatchPrep;
+    $('swStop').onclick = stopStopwatch;
+    $('swReset').onclick = resetStopwatch;
+
+    $('q10').onclick = () => setCountdown(10);
+    $('q30').onclick = () => setCountdown(30);
+    $('q60').onclick = () => setCountdown(60);
+    $('cdStart').onclick = startCountdownPrep;
+    $('cdPause').onclick = pauseCountdown;
+    $('cdReset').onclick = resetCountdown;
+
+    $('selectVowels').onclick = () => { vowels.forEach(c => app.banks.selectedLetters.add(c)); syncChips('letterBank', app.banks.selectedLetters); };
+    $('selectConsonants').onclick = () => { consonants.forEach(c => app.banks.selectedLetters.add(c)); syncChips('letterBank', app.banks.selectedLetters); };
+    $('clearLetters').onclick = () => { app.banks.selectedLetters.clear(); syncChips('letterBank', app.banks.selectedLetters); };
+    $('genLetters').onclick = () => maybeGenerateFromBank(app.banks.selectedLetters, +$('lenLetters').value || 120, 'lettersFlashChk');
+
+    $('selectAllDip').onclick = () => { DIFTONG_ORD.forEach(x => app.banks.selectedDip.add(x)); syncChips('bankDip', app.banks.selectedDip); };
+    $('clearAllDip').onclick = () => { app.banks.selectedDip.clear(); syncChips('bankDip', app.banks.selectedDip); };
+    $('genDip').onclick = () => maybeGenerateFromBank(app.banks.selectedDip, +$('lenDip').value || 120, 'dipFlashChk');
+
+    $('selectAllGraf').onclick = () => { GRAFEM_ORD.forEach(x => app.banks.selectedGraf.add(x)); syncChips('bankGraf', app.banks.selectedGraf); };
+    $('clearAllGraf').onclick = () => { app.banks.selectedGraf.clear(); syncChips('bankGraf', app.banks.selectedGraf); };
+    $('genGraf').onclick = () => maybeGenerateFromBank(app.banks.selectedGraf, +$('lenGraf').value || 120, 'grafFlashChk');
+
+    $('selectAllHF').onclick = () => { (HF_CATS[app.ui.activeHF] || []).forEach(x => app.banks.selectedHF.add(x)); syncChips('bankHF', app.banks.selectedHF); };
+    $('clearAllHF').onclick = () => { app.banks.selectedHF.clear(); syncChips('bankHF', app.banks.selectedHF); };
+    $('genHF').onclick = () => maybeGenerateFromBank(app.banks.selectedHF, +$('lenHF').value || 120, 'hfFlashChk');
+
+    $('testText').onchange = updateTestPreview;
+    $('loadTestBtn').onclick = loadTestText;
+
+    $('write1').onclick = () => setWriteSeconds(1);
+    $('write3').onclick = () => setWriteSeconds(3);
+    $('write5').onclick = () => setWriteSeconds(5);
+    $('applyWriteCustom').onclick = () => setWriteSeconds($('writeCustomSec').value);
+    $('selectAllWrite').onclick = () => { getWriteWords().forEach(w => app.banks.selectedWrite.add(w)); syncChips('writeBank', app.banks.selectedWrite); };
+    $('clearAllWrite').onclick = () => { app.banks.selectedWrite.clear(); syncChips('writeBank', app.banks.selectedWrite); };
+    $('addWriteWordsBtn').onclick = addCustomWriteWords;
+    $('clearCustomWriteWordsBtn').onclick = clearCustomWriteWords;
+    $('startWriteBtn').onclick = startWriteTraining;
+    $('checkWriteBtn').onclick = checkWriteAnswer;
+    $('nextWriteBtn').onclick = nextWriteWord;
+    $('writeAnswer').addEventListener('keydown', e => {
+      if(e.key === 'Enter' && !$('checkWriteBtn').disabled) checkWriteAnswer();
+    });
+
+    $('flashDrillStartBtn').onclick = startFlashDrill;
+    $('flashNextCardBtn').onclick = advanceFlashDrill;
+    $('flashExitBtn').onclick = () => stopFlashcards();
+    $('flashBtn').onclick = openMistakeFlashModal;
+
+    $('openSlotBtn').onclick = openSlot;
+    $('slotClose').onclick = closeSlot;
+    $('slotSpin').onclick = spinSlot;
+
+    $('closeSummaryBtn').onclick = () => $('summaryModal').classList.remove('active');
+    $('copySummaryBtn').onclick = copySummary;
+
+    $('exportCsvBtn').onclick = exportCSV;
+    $('clearDataBtn').onclick = () => {
+      if(confirm('Slette alle resultater?')){
+        state.rounds = [];
+        persist();
+        rebuildResultsTable();
+        showStatus('Resultatene er slettet.', 'ok');
+      }
+    };
+    $('resetAllBtn').onclick = fullReset;
+
+    window.addEventListener('keydown', e => {
+      if(app.flashcards.active && (app.timer.cdRunning || app.timer.cdPreparing) && e.code === 'Space'){
+        e.preventDefault();
+        if(app.timer.cdRunning) advanceFlashDrill();
+        return;
+      }
+      if(e.key === 'Enter' && app.ui.mode !== 'write' && app.reading.lastClickedIdx != null && !app.flashcards.active){
+        if(app.reading.finishedThisRound && app.reading.lastIdx === app.reading.lastClickedIdx) finalizeRound();
+        else setLastRead(app.reading.lastClickedIdx, true);
       }
     });
   }
 
-  function bindModeButtons(){
-    const map={ text:'modeText', letters:'modeLetters', dip:'modeDip', graf:'modeGraf', hf:'modeHF', test:'modeTest', write:'modeWrite' };
-    Object.entries(map).forEach(([m,id])=>{
-      $(id).addEventListener('click', ()=>{
-        mode=m; Object.values(map).forEach(b=>$(b).classList.remove('active')); $(id).classList.add('active');
-        show('textArea', m==='text'); show('letterArea', m==='letters'); show('bankAreaDip', m==='dip'); show('bankAreaGraf', m==='graf'); show('bankAreaHF', m==='hf'); show('testArea', m==='test'); show('writeArea', m==='write'); show('readSharedArea', m!=='write');
-        clearMarks(); updateCounts(); hidePostRoundBar();
-      });
-    });
-  }
-  function show(el,yes){ $(el).style.display = yes?'block':'none'; }
-
-  function renderTokens(list){
-    const w=$('wordDisplay'); w.innerHTML=''; tokens=list;
-    list.forEach((t,i)=>{
-      const span=document.createElement('span'); span.textContent=t; span.className='word';
-      span.addEventListener('click',()=>onTokenClick(i,span));
-      span.addEventListener('dblclick',()=>setLast(i,true));
-      w.appendChild(span); w.append(' ');
-    });
-    $('totalWords').textContent=list.length; applyPrevMarker();
-  }
-  function onTokenClick(i,el){
-    lastClickedIdx=i;
-    const active=(swRunning||cdRunning||swPreparing||cdPreparing);
-    if(active){ toggleError(i,el); return; }
-    if(finishedThisRound){ if(lastIdx===null){ setLast(i,true); return; } if(i===lastIdx){ finalize(); return; } toggleError(i,el); return; }
-    toggleError(i,el);
-  }
-  function toggleError(i,el){ if(el.classList.contains('error')){ el.classList.remove('error'); mistakes.delete(i);} else { el.classList.add('error'); mistakes.add(i);} updateCounts(); }
-  function setLast(i,scroll=false){ document.querySelectorAll('#wordDisplay .word.last').forEach(n=>n.classList.remove('last')); lastIdx=i; const nodes=document.querySelectorAll('#wordDisplay .word'); if(nodes[i]){ nodes[i].classList.add('last'); if(scroll){ nodes[i].scrollIntoView({behavior:'smooth',block:'center',inline:'center'});} } nodes.forEach((n,idx)=>n.classList.toggle('beyond', lastIdx!==null && idx>lastIdx)); updateCounts(); }
-  function counted(){ const total= lastIdx===null?0:(lastIdx+1); let err=0; mistakes.forEach(idx=>{ if(lastIdx!==null && idx<=lastIdx) err++; }); return { total, err, corr: Math.max(0,total-err) }; }
-  function updateCounts(){ const {total,err,corr}=counted(); $('mistakeCount').textContent=err; $('correctCount').textContent=corr; }
-  function setClickable(isOn){ $('wordDisplay').classList.toggle('no-click', !isOn); }
-  function shouldLock(){ return !$('allowMarkingDuringTimer').checked; }
-  function showOverlayStep(txt){ const o=$('startOverlay'); o.style.display='flex'; o.textContent=txt; }
-  function hideOverlay(){ $('startOverlay').style.display='none'; }
-
-  function onPrepareText(){
-    const t=$('inputText').value.trim(); if(!t){ alert('Lim inn tekst.'); return; }
-    const arr=t.split(/\s+/).filter(Boolean);
-    originalTokens=[...arr];
-    if($('scrambleChk').checked){ renderTokens(shuffle([...arr])); $('toggleOrderBtn').style.display='inline-block'; $('toggleOrderBtn').textContent='Vis original rekkefølge'; }
-    else { renderTokens(arr); $('toggleOrderBtn').style.display='inline-block'; $('toggleOrderBtn').textContent='Bland ord (scramble)'; }
-    S.savedOriginal=arr; save(); clearMarks(); updateCounts(); hidePostRoundBar(); currentTest=null;
-  }
-  function onToggleOrder(){
-    if(!S.savedOriginal || !S.savedOriginal.length) return;
-    if($('toggleOrderBtn').textContent.startsWith('Vis')){ renderTokens([...S.savedOriginal]); $('toggleOrderBtn').textContent='Bland ord (scramble)'; }
-    else { renderTokens(shuffle([...S.savedOriginal])); $('toggleOrderBtn').textContent='Vis original rekkefølge'; }
-    clearMarks(); updateCounts();
-  }
-  function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
-  function buildLetterBank(){ const bank=$('letterBank'); bank.innerHTML=''; alphabet.forEach(ch=>{ const d=document.createElement('div'); d.className='chip'; d.textContent=ch; d.addEventListener('click',()=>toggleSel(selectedLetters,ch,d)); bank.appendChild(d); }); }
-  function buildWordBank(containerId, list, selSet){ const bank=$(containerId); bank.innerHTML=''; list.forEach(w=>{ const d=document.createElement('div'); d.className='chip'; d.textContent=w; d.addEventListener('click',()=>toggleSel(selSet,w,d)); if(selSet.has(w)) d.classList.add('sel'); bank.appendChild(d); }); }
-  function normalizeWordList(raw){
-    return Array.from(new Set(
-      String(raw||'')
-        .split(/[\n,;]+/)
-        .map(x=>x.trim().toLowerCase())
-        .filter(Boolean)
-    ));
-  }
-  function refreshWriteBank(){
-    const valid = new Set(getWriteWords());
-    selectedWrite = new Set(Array.from(selectedWrite).filter(w=>valid.has(w)));
-    buildWordBank('writeBank', getWriteWords(), selectedWrite);
-  }
-  function addCustomWriteWords(){
-    const words = normalizeWordList($('writeCustomWords').value);
-    if(words.length===0){ alert('Skriv inn minst ett ord.'); return; }
-    S.customWriteWords = words;
-    words.forEach(w=>selectedWrite.add(w));
-    save();
-    refreshWriteBank();
-  }
-  function clearCustomWriteWords(){
-    S.customWriteWords = [];
-    $('writeCustomWords').value = '';
-    save();
-    refreshWriteBank();
-  }
-  function toggleSel(set,val,el){ if(set.has(val)) set.delete(val); else set.add(val); el.classList.toggle('sel'); }
-  function syncChips(containerId,set){ $(containerId).querySelectorAll('.chip').forEach(ch=>{ ch.classList.toggle('sel', set.has(ch.textContent)); }); }
-  function buildHF(){ const tabs=$('hfTabs'); tabs.innerHTML=''; Object.keys(HF_CATS).forEach(cat=>{ const t=document.createElement('span'); t.className='tab'+(cat===activeHF?' active':''); t.textContent=cat; t.addEventListener('click',()=>{ activeHF=cat; buildHFList(); tabs.querySelectorAll('.tab').forEach(x=>x.classList.remove('active')); t.classList.add('active'); }); tabs.appendChild(t); }); buildHFList(); }
-  function buildHFList(){ const bank=$('bankHF'); bank.innerHTML=''; (HF_CATS[activeHF]||[]).forEach(w=>{ const d=document.createElement('div'); d.className='chip'; d.textContent=w; d.addEventListener('click',()=>toggleSel(selectedHF,w,d)); if(selectedHF.has(w)) d.classList.add('sel'); bank.appendChild(d); }); }
-  function genFromSet(sel, len){ const L=Math.min(120, Math.max(1, len|0)); const arrSel=Array.from(sel); if(arrSel.length===0){ alert('Velg minst ett element.'); return; } let seq='', attempts=0; do{ const out=[]; for(let i=0;i<L;i++){ out.push(arrSel[Math.floor(Math.random()*arrSel.length)]); } seq=out.join('|'); attempts++; if(attempts>100) break; }while(seq===S.prevSeq); S.prevSeq=seq; save(); renderTokens(seq.split('|')); applyPrevMarker(); clearMarks(); updateCounts(); hidePostRoundBar(); currentTest=null; }
-  function clearMarks(){ mistakes.clear(); lastIdx=null; finishedThisRound=false; document.querySelectorAll('#wordDisplay .word').forEach(n=>n.classList.remove('error','last','beyond')); }
-  function applyPrevMarker(){ document.querySelectorAll('#wordDisplay .word').forEach(n=>n.classList.remove('prev')); if(S.prevLastIdx==null) return; const idx=Math.min(S.prevLastIdx, tokens.length-1); if(idx>=0){ const nodes=document.querySelectorAll('#wordDisplay .word'); if(nodes[idx]){ nodes[idx].classList.add('prev'); } } }
-
-  const TEST_TEXTS={ pa_tur:{ nivå:'1. trinn – enkel lyd- og ordlesing', tittel:'På tur', tekst:`Lise har en katt. Katten heter Mio. Mio vil løpe. Lise løper etter. De løper til en busk. Der sitter en mus.`}, i_hagen:{ nivå:'2. trinn – sammenhengende fortelling med enkle setninger', tittel:'I hagen', tekst:`Omar går ut i hagen. Han har en rød bøtte. Han fyller bøtta med jord. Så finner han en mark. Han vil mate fisken med marken. Fisken bor i en dam. Omar blir glad når fisken spiser.`}, den_nye_sykkelen:{ nivå:'3.–4. trinn – litt lengre fortelling med beskrivelser og dialog', tittel:'Den nye sykkelen', tekst:`Maria hadde spart penger i mange måneder. Endelig kunne hun kjøpe seg en ny sykkel. Sykkelen var blå og hadde en liten kurv foran. Hun syklet bort til venninnen sin. «Se hva jeg har fått!» ropte Maria stolt. De to jentene syklet rundt på veien hele ettermiddagen, og lo da de nesten krasjet i et tre.`}, reisen_til_maanen:{ nivå:'5.–7. trinn – mer kompleks tekst med faktaelement', tittel:'Reisen til månen', tekst:`I 1969 landet mennesker på månen for aller første gang. Romskipet het Apollo 11, og astronautene som reiste dit var Neil Armstrong, Buzz Aldrin og Michael Collins. Armstrong ble den første som satte foten på månens overflate. Han sa de berømte ordene: «Et lite skritt for et menneske, et stort sprang for menneskeheten.» Denne reisen ble et symbol på hva mennesker kan få til når de samarbeider om et mål.`} };
-  function updateTestPreview(){ const sel=$('testText'); const data=TEST_TEXTS[sel.value]; $('testPreview').innerHTML=data?`<b>${data.nivå} — «${data.tittel}»</b><br>${data.tekst}`:''; }
-  function loadTestText(){ const key=$('testText').value; const typ=$('testType').value; const data=TEST_TEXTS[key]; if(!data){ alert('Fant ikke valgt tekst.'); return; } mode='test'; document.querySelectorAll('.mode button').forEach(b=>b.classList.remove('active')); $('modeTest').classList.add('active'); show('textArea',false); show('letterArea',false); show('bankAreaDip',false); show('bankAreaGraf',false); show('bankAreaHF',false); show('testArea',true); show('writeArea',false); show('readSharedArea',true); const arr=data.tekst.split(/\s+/).filter(Boolean); S.savedOriginal=[...arr]; save(); renderTokens(arr); clearMarks(); updateCounts(); hidePostRoundBar(); $('toggleOrderBtn').style.display='none'; currentTest={type:typ, key, nivå:data.nivå, tittel:data.tittel}; announce(`Testtekst lastet: ${data.tittel}`); }
-
-  function showPostRoundBar(){ $('postRoundBar').style.display='flex'; }
-  function hidePostRoundBar(){ $('postRoundBar').style.display='none'; }
-  function announce(msg){ const lr=$('liveRegion'); lr.textContent=''; setTimeout(()=>lr.textContent=msg,10); }
-
-  function startSWPrep(){ if(swRunning||swPreparing) return; swPreparing=true; $('swStart').disabled=true; clearMarks(); hidePostRoundBar(); if(shouldLock()) setClickable(false); let c=3; showOverlayStep(c); const prep=setInterval(()=>{ c--; if(c>0) showOverlayStep(c); else if(c===0) showOverlayStep('LES!'); else { clearInterval(prep); hideOverlay(); startSW(); } },1000); }
-  function startSW(){ swPreparing=false; $('swStart').disabled=false; swRunning=true; swSec=0; $('swTime').textContent=fmt(swSec); swInt=setInterval(()=>{ swSec++; $('swTime').textContent=fmt(swSec); },1000); }
-  function stopSW(){ if(!swRunning) return; clearInterval(swInt); swRunning=false; finishedThisRound=true; setClickable(true); alert('⏰ Stoppeklokka stoppet. Marker feil og klikk siste.'); announce('Stoppeklokka er stoppet. Marker feil og klikk siste.'); showPostRoundBar(); }
-  function resetSW(){ if(swRunning){ clearInterval(swInt); swRunning=false; } swSec=0; $('swTime').textContent='00:00'; setClickable(true); }
-  function setCountdown(s){ cdInit=s; cdLeft=s; $('cdTime').textContent=fmt(cdLeft); }
-  function startCDPrep(){ if(cdRunning||cdPreparing) return; cdPreparing=true; $('cdStart').disabled=true; clearMarks(); hidePostRoundBar(); if(shouldLock()) setClickable(false); let c=3; showOverlayStep(c); const prep=setInterval(()=>{ c--; if(c>0) showOverlayStep(c); else if(c===0) showOverlayStep('LES!'); else { clearInterval(prep); hideOverlay(); startCD(); } },1000); }
-  function startCD(){ cdPreparing=false; $('cdStart').disabled=false; cdRunning=true; $('cdTime').textContent=fmt(cdLeft); cdInt=setInterval(()=>{ if(cdLeft>0){ cdLeft--; $('cdTime').textContent=fmt(cdLeft); } if(cdLeft<=0){ clearInterval(cdInt); cdRunning=false; finishedThisRound=true; setClickable(true); alert('⏰ Tiden er ute. Marker feil og klikk siste.'); announce('Nedtellingen er ferdig. Marker feil og klikk siste.'); showPostRoundBar(); } },1000); }
-  function pauseCD(){ if(!cdRunning) return; clearInterval(cdInt); cdRunning=false; setClickable(true); }
-  function resetCD(){ if(cdRunning){ clearInterval(cdInt); cdRunning=false; } setCountdown(cdInit||60); setClickable(true); }
-
-  function finalize(){
-    const swUsed = swSec > 0;
-    const cdUsed = (cdInit - cdLeft) > 0;
-    const timeSec = cdUsed ? (cdInit - cdLeft) : (swUsed ? swSec : 0);
-    if(timeSec<=0){ alert('Start en av klokkene.'); return; }
-    const {total,err,corr}=counted(); if(total<=0){ alert('Marker siste leste først.'); return; }
-
-    const prevBest=S.bestWPM||0;
-    const wpm=Math.round((corr*60)/timeSec);
-    const fpm=Math.round((err*60)/timeSec);
-    const cpm=Math.round((corr*60)/timeSec);
-    const coins=(wpm>prevBest)?10:3; S.coins=(S.coins||0)+coins;
-    if(wpm>prevBest){ S.lightning=(S.lightning||0)+1; const diff=wpm-prevBest; const progGain=Math.min(3, Math.max(1, Math.floor(diff/5))); addDiamondProgress(progGain); }
-    S.bestWPM=Math.max(prevBest,wpm);
-    S.roundCount=(S.roundCount||0)+1;
-    S.prevLastIdx=lastIdx;
-    const roundMistakes=[]; mistakes.forEach(i=>{ if(i<=lastIdx){ const w=tokens[i]; if(w && !roundMistakes.includes(w)) roundMistakes.push(w); } });
-    S.lastMistakes=roundMistakes; roundMistakes.forEach(w=>{ if(!S.wordBank.includes(w)) S.wordBank.push(w); });
-    const modeLabel = currentTest ? `test-${currentTest.type}` : mode;
-    S.rounds.push({ ts:Date.now(), student:(S.currentStudent||''), timeSec, total, errors:err, correct:corr, wpm, coins, lastIdx, fpm, cpm, mode: modeLabel });
-    save();
-    updateTop(); updateDiamondBar(); rebuildResults();
-    spinsLeftRound=3; openSlotAuto();
-    if((S.lastMistakes||[]).length>0){ setTimeout(()=>openFlash(),1200); }
-    if(currentTest){ const sum = buildSummary(currentTest, {timeSec,total,err,corr,wpm,fpm,cpm}, roundMistakes); $('summaryText').value = sum; $('summaryModal').classList.add('active'); }
-    finishedThisRound=false; lastIdx=null; document.querySelectorAll('#wordDisplay .word').forEach(n=>n.classList.remove('error','last','beyond')); mistakes.clear(); updateCounts(); applyPrevMarker(); hidePostRoundBar();
-    if(swRunning){ clearInterval(swInt); swRunning=false; }
-    if(cdRunning){ clearInterval(cdInt); cdRunning=false; }
-    setClickable(true); $('swTime').textContent='00:00'; setCountdown(cdInit||60); currentTest=null;
+  function init(){
+    buildLetterBank();
+    buildWordBank('bankDip', DIFTONG_ORD, app.banks.selectedDip);
+    buildWordBank('bankGraf', GRAFEM_ORD, app.banks.selectedGraf);
+    buildHFCategoryTabs();
+    buildHFWordList();
+    buildWordBank('writeBank', getWriteWords(), app.banks.selectedWrite);
+    $('writeCustomWords').value = (state.customWriteWords || []).join('\n');
+    updateTestPreview();
+    updateTopStats();
+    rebuildResultsTable();
+    resetWriteStage();
+    setMode('text');
+    setCountdown(60);
+    renderTokens([]);
+    bindEvents();
   }
 
-  function addDiamondProgress(gain){ S.diamondProgress = (S.diamondProgress||0) + gain; while(S.diamondProgress>=10){ S.diamondProgress-=10; S.diamonds=(S.diamonds||0)+1; if(S.diamonds>=10){ alert('🎁 10 diamanter! Premie fra læreren!'); S.diamonds=0; } } save(); updateTop(); updateDiamondBar(); }
-  function updateTop(){ $('coinsTotal').textContent=S.coins||0; $('bestWPM').textContent=S.bestWPM||0; $('diamonds').textContent=`${S.diamonds||0}/10`; $('roundCounter').textContent=S.roundCount||0; $('lightningTotal').textContent=S.lightning||0; const pct=Math.round(((S.diamondProgress||0)/10)*100); $('diamondPct').textContent=pct+'%'; }
-  function updateDiamondBar(){ const progPct=Math.min(100, ((S.diamondProgress||0)/10)*100); $('diamondBar').style.width=progPct+'%'; }
-  function rebuildResults(){ const tb=$('resultsBody'); tb.innerHTML=''; (S.rounds||[]).forEach((r,i)=>{ const tr=document.createElement('tr'); const dt=new Date(r.ts).toLocaleString(undefined,{hour12:false}); tr.innerHTML=`<td>${i+1}</td><td>${dt}</td><td>${r.student||''}</td><td>${r.timeSec}</td><td>${r.total}</td><td>${r.errors} (${r.fpm}/min)</td><td>${r.correct} (${r.cpm}/min)</td><td><b>${r.wpm}</b></td><td>${r.coins}</td><td>${r.mode||''}</td>`; tb.appendChild(tr); }); }
-  function exportCSV(){ const rows=[["#","Dato/tid","Elev","Tid (s)","Antall","Feil","Feil/min","Korrekte","K-OPM","Poeng","Modus"]]; (S.rounds||[]).forEach((r,i)=>{ rows.push([ i+1, new Date(r.ts).toISOString(), r.student||'', r.timeSec, r.total, r.errors, r.fpm, r.correct, r.wpm, r.coins, r.mode ]); }); const csv = rows.map(r=>r.map(x=>{ const s=String(x??''); return /[",;\n]/.test(s) ? `"${s.replace(/"/g,'""')}"` : s; }).join(';')).join('\n'); const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='lesetrening-resultater.csv'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); }
-
-  const symbols=['🍒','🍋','🔔','⭐','7️⃣','🍀'];
-  function updateSpinUI(){ const btn=$('slotSpin'); btn.textContent=spinsLeftRound>0?`Spinn (${spinsLeftRound} igjen)`:'Ingen sjanser igjen'; btn.disabled=spinsLeftRound<=0; $('openSlotBtn').style.display=spinsLeftRound>0?'inline-block':'none'; }
-  function openSlotAuto(){ $('openSlotBtn').style.display='inline-block'; openSlot(); updateSpinUI(); }
-  function openSlot(){ $('slotModal').classList.add('active'); $('slotMsg').textContent='Trykk Spinn'; updateSpinUI(); }
-  function closeSlot(){ $('slotModal').classList.remove('active'); }
-  function spinSlot(){ if(spinsLeftRound<=0) return; $('slotMsg').textContent='Snurrer…'; const r1=$('reel1'), r2=$('reel2'), r3=$('reel3'); let t=0; const spin=setInterval(()=>{ r1.textContent=pick(symbols); r2.textContent=pick(symbols); r3.textContent=pick(symbols); if(++t>12){ clearInterval(spin); finish(); } },90); function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; } function finish(){ const win=Math.random()<0.30; if(win){ r1.textContent='💎'; r2.textContent='💎'; r3.textContent='💎'; $('slotMsg').textContent='JACKPOT! Du vant en diamant!'; S.diamonds=(S.diamonds||0)+1; if(S.diamonds>=10){ alert('🎁 10 diamanter! Premie fra læreren!'); S.diamonds=0; } save(); updateTop(); updateDiamondBar(); }else{ r1.textContent='❌'; r2.textContent='❌'; r3.textContent='❌'; $('slotMsg').textContent='Ingen jackpot denne gangen.'; } spinsLeftRound=Math.max(0,spinsLeftRound-1); updateSpinUI(); } }
-  function getFlash(){ return Array.isArray(S.lastMistakes)?[...S.lastMistakes]:[]; }
-  function openFlash(){ const list=getFlash(); if(list.length===0){ alert('Ingen feil fra siste omgang 👌'); return; } let idx=0; $('flashModal').classList.add('active'); function render(){ $('flashWord').textContent=list[idx]; $('flashProg').textContent=`Ord ${idx+1} av ${list.length}`; } render(); $('flashNext').onclick=()=>{ idx=(idx+1)%list.length; render(); }; $('flashDone').onclick=()=>{ $('flashModal').classList.remove('active'); }; }
-  function buildSummary(test, m, feilord){ const dt = new Date().toLocaleString(undefined,{hour12:false}); const feilListe = (feilord && feilord.length) ? feilord.join(', ') : 'Ingen'; const vurdering = m.wpm >= 90 ? 'svært god flyt' : m.wpm >= 60 ? 'god flyt' : m.wpm >= 40 ? 'fremvoksende flyt' : 'behov for mer grunnleggende øving'; return [ `Lesetest (${test.type === 'pre' ? 'Pre-test' : 'Post-test'}) — ${test.nivå} — «${test.tittel}»`, `Dato/tid: ${dt}`, `Tid brukt: ${fmt(m.timeSec)} (${m.timeSec} sekunder)`, `Antall leste ord: ${m.total}`, `Feil: ${m.err}  |  Korrekte: ${m.corr}`, `Feil per minutt: ${m.fpm}  |  Korrekte per minutt: ${m.cpm}`, `K-OPM (benchmark): ${m.wpm}`, `Feilord: ${feilListe}`, `Kort vurdering: ${vurdering}.`, `Kommentar: Testen ble gjennomført ved at eleven leste teksten høyt. Voksen markerte feil fortløpende og klikket «siste leste» ved stopp. Tallene over kan limes inn i elevens rapport.` ].join('\n'); }
-  function fullReset(){ const code = prompt('Full nullstilling sletter ALLE resultater, rekord, poeng, diamanter, navn m.m.\nSkriv koden for å bekrefte:'); if(code===null) return; if(code==='1985'){ S={...def}; save(); updateTop(); updateDiamondBar(); rebuildResults(); renderTokens([]); clearMarks(); updateCounts(); hidePostRoundBar(); $('swTime').textContent='00:00'; setCountdown(60); rebuildStudentSelect(); resetWriteStageOnly(true); $('writeCustomWords').value=''; selectedWrite = new Set(getWriteWords()); refreshWriteBank(); alert('Alt er nullstilt.'); announce('Alt er nullstilt.'); } else { alert('Feil kode.'); } }
-  function setStudentFromInput(){ const v=$('studentInput').value.trim(); S.currentStudent=v; S.students=S.students||[]; if(v && !S.students.includes(v)) S.students.push(v); save(); rebuildStudentSelect(); rebuildResults(); }
-  function onStudentSelectChange(){ const sel=$('studentSelect'); const v=sel.value; if(!v) return; S.currentStudent=v; S.students=S.students||[]; if(!S.students.includes(v)) S.students.push(v); $('studentInput').value=v; save(); rebuildResults(); }
-  function rebuildStudentSelect(){ const sel=$('studentSelect'); sel.innerHTML=''; const list=(S.students||[]).slice().sort((a,b)=>a.localeCompare(b,'no')); if(list.length===0){ sel.style.display='none'; return; } sel.style.display='inline-block'; const ph=document.createElement('option'); ph.value=''; ph.textContent='Velg elev…'; sel.appendChild(ph); list.forEach(n=>{ const o=document.createElement('option'); o.value=n; o.textContent=n; sel.appendChild(o); }); sel.value=S.currentStudent||''; }
-
-  function setWriteSeconds(sec){ writeFlashSec=Math.min(20, Math.max(0, Number(sec)||0)); $('writeCustomSec').value = writeFlashSec; updateWriteUI(); }
-  function updateWriteUI(){ $('writeSecView').textContent = writeFlashSec + 's'; ['write1','write3','write5'].forEach(id=>$(id).classList.remove('purple')); if(writeFlashSec===1) $('write1').classList.add('purple'); if(writeFlashSec===3) $('write3').classList.add('purple'); if(writeFlashSec===5) $('write5').classList.add('purple'); $('writeCorrect').textContent=writeCorrect; $('writeWrong').textContent=writeWrong; $('writeLeft').textContent=Math.max(0, writeQueue.length - writeIndex); $('writeCustomSec').value = writeFlashSec; }
-  function resetWriteStageOnly(full=false){ if(full){ writeCorrect=0; writeWrong=0; writeQueue=[]; writeIndex=0; }
-    writeActive=false; writeAnswered=false; currentWriteWord=''; $('writePrompt').textContent='Velg ord og start økta.'; $('writeFlash').textContent='klar'; $('writeFlash').classList.remove('hiddenWord'); $('writeAnswer').value=''; $('writeAnswer').disabled=true; $('checkWriteBtn').disabled=true; $('nextWriteBtn').disabled=true; $('writeFeedback').textContent=''; updateWriteUI(); }
-  function startWriteTraining(){
-    const chosen=Array.from(selectedWrite);
-    const len=Math.min(30, Math.max(1, +$('writeLen').value || 10));
-    if(chosen.length===0){ alert('Velg minst ett ord.'); return; }
-    writeQueue=[]; writeIndex=0; writeCorrect=0; writeWrong=0; writeAnswered=false; writeActive=true;
-    for(let i=0;i<len;i++) writeQueue.push(chosen[Math.floor(Math.random()*chosen.length)]);
-    $('writeFeedback').textContent='';
-    updateWriteUI();
-    nextWriteWord();
-  }
-  function nextWriteWord(){
-    if(!writeActive && writeQueue.length===0){ return; }
-    if(writeIndex>=writeQueue.length){ finishWriteTraining(); return; }
-    writeAnswered=false;
-    currentWriteWord=writeQueue[writeIndex];
-    $('writeAnswer').value='';
-    $('writeAnswer').disabled=true;
-    $('checkWriteBtn').disabled=true;
-    $('nextWriteBtn').disabled=true;
-    $('writeFeedback').textContent='';
-    $('writePrompt').textContent=`Ord ${writeIndex+1} av ${writeQueue.length}`;
-    $('writeFlash').classList.remove('hiddenWord');
-    $('writeFlash').textContent=currentWriteWord;
-    announce(`Viser ord ${writeIndex+1}`);
-    setTimeout(()=>{
-      $('writeFlash').textContent='•••';
-      $('writeFlash').classList.add('hiddenWord');
-      $('writeAnswer').disabled=false;
-      $('checkWriteBtn').disabled=false;
-      $('writeAnswer').focus();
-      $('writeAnswer').select();
-      announce('Skriv ordet du så');
-    }, writeFlashSec*1000);
-    updateWriteUI();
-  }
-  function checkWriteAnswer(){
-    if(writeAnswered) return;
-    const guess=norm($('writeAnswer').value);
-    if(!guess){ alert('Skriv ordet først.'); return; }
-    const correct=norm(currentWriteWord);
-    const ok = guess===correct;
-    writeAnswered=true;
-    $('writeAnswer').disabled=true;
-    $('checkWriteBtn').disabled=true;
-    $('nextWriteBtn').disabled=false;
-    if(ok){
-      writeCorrect++;
-      $('writeFeedback').textContent='Riktig!';
-      $('writeFeedback').className='writeFeedback ok';
-      S.coins=(S.coins||0)+1;
-      if(Math.random()<0.20) addDiamondProgress(1); else { save(); updateTop(); }
-    } else {
-      writeWrong++;
-      $('writeFeedback').textContent=`Feil. Ordet var «${currentWriteWord}».`;
-      $('writeFeedback').className='writeFeedback bad';
-    }
-    S.rounds.push({ ts:Date.now(), student:(S.currentStudent||''), timeSec:writeFlashSec, total:1, errors:ok?0:1, correct:ok?1:0, wpm:0, coins:ok?1:0, lastIdx:0, fpm:(ok || writeFlashSec<=0)?0:Math.round(60/writeFlashSec), cpm:(!ok || writeFlashSec<=0)?0:Math.round(60/writeFlashSec), mode:`skriving-${writeFlashSec}s` });
-    S.roundCount=(S.roundCount||0)+1;
-    save();
-    updateTop();
-    updateDiamondBar();
-    rebuildResults();
-    writeIndex++;
-    updateWriteUI();
-  }
-  function finishWriteTraining(){
-    writeActive=false;
-    $('writePrompt').textContent='Økta er ferdig.';
-    $('writeFlash').classList.remove('hiddenWord');
-    $('writeFlash').textContent = writeCorrect >= writeWrong ? 'bra jobba' : 'ferdig';
-    $('writeAnswer').disabled=true;
-    $('checkWriteBtn').disabled=true;
-    $('nextWriteBtn').disabled=true;
-    const total = writeCorrect + writeWrong;
-    $('writeFeedback').className='writeFeedback';
-    $('writeFeedback').textContent=`Du fikk ${writeCorrect} av ${total} riktige.`;
-    announce(`Skriveøkta er ferdig. ${writeCorrect} riktige av ${total}.`);
-  }
+  init();
 })();
 </script>
 </body>
