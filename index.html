@@ -396,7 +396,7 @@ const TEST_TEXTS={
 
 const app={
   ui:{mode:'text',activeHF:Object.keys(HF_CATS)[0],currentTest:null,flashOriginMode:''},
-  reading:{tokens:[],mistakes:new Set(),lastIdx:null,lastClickedIdx:null,finishedThisRound:false,savedOriginal:[]},
+  reading:{tokens:[],mistakes:new Set(),lastIdx:null,lastClickedIdx:null,finishedThisRound:false,savedOriginal:[],clickTimers:new Map()},
   timer:{swInt:null,swSec:0,swRunning:false,swPreparing:false,cdInt:null,cdLeft:30,cdInit:30,cdRunning:false,cdPreparing:false},
   reward:{spinsLeftRound:0},
   flashcards:{active:false,cards:[],readCount:0},
@@ -464,12 +464,34 @@ function setPostRoundBar(visible){$('postRoundBar').style.display=visible?'flex'
 function renderTokens(list){
   stopFlashcards(false);app.reading.tokens=list;const wrap=$('wordDisplay');wrap.innerHTML='';wrap.classList.toggle('empty',list.length===0);
   if(!list.length){wrap.textContent='Ingen tekst lastet inn ennå.';updateCounts();return}
-  list.forEach((token,i)=>{const span=document.createElement('span');span.className='word';span.textContent=token;span.dataset.index=String(i);span.addEventListener('click',()=>onTokenClick(i,span));span.addEventListener('dblclick',()=>setLastRead(i,true));wrap.appendChild(span);wrap.append(' ')});
+  list.forEach((token,i)=>{const span=document.createElement('span');span.className='word';span.textContent=token;span.dataset.index=String(i);span.addEventListener('click',e=>onTokenClick(i,span,e));span.addEventListener('dblclick',e=>onTokenDoubleClick(i,span,e));wrap.appendChild(span);wrap.append(' ')});
   applyPreviousMarker();updateCounts();
 }
 function toggleError(index,el){if(el.classList.contains('error')){el.classList.remove('error');app.reading.mistakes.delete(index)}else{el.classList.add('error');app.reading.mistakes.add(index)}updateCounts()}
 function setLastRead(index,scroll=false){bySel('#wordDisplay .word.last').forEach(node=>node.classList.remove('last'));app.reading.lastIdx=index;const nodes=bySel('#wordDisplay .word');if(nodes[index]){nodes[index].classList.add('last');if(scroll)nodes[index].scrollIntoView({behavior:'smooth',block:'center'})}nodes.forEach((node,idx)=>node.classList.toggle('beyond',app.reading.lastIdx!==null&&idx>app.reading.lastIdx));updateCounts()}
-function onTokenClick(index,el){app.reading.lastClickedIdx=index;toggleError(index,el)}
+function clearPendingWordClick(index){
+  const timer=app.reading.clickTimers.get(index);
+  if(timer){clearTimeout(timer);app.reading.clickTimers.delete(index)}
+}
+function onTokenClick(index,el,e){
+  app.reading.lastClickedIdx=index;
+  clearPendingWordClick(index);
+  const timer=setTimeout(()=>{
+    app.reading.clickTimers.delete(index);
+    toggleError(index,el);
+  },220);
+  app.reading.clickTimers.set(index,timer);
+}
+function onTokenDoubleClick(index,el,e){
+  clearPendingWordClick(index);
+  app.reading.lastClickedIdx=index;
+  setLastRead(index,true);
+  if(el.classList.contains('error')){
+    el.classList.remove('error');
+    app.reading.mistakes.delete(index);
+    updateCounts();
+  }
+}
 
 function buildWordBank(containerId,list,selectedSet){
   const bank=$(containerId);bank.innerHTML='';
@@ -483,12 +505,40 @@ function normalizeWordList(raw){return unique(String(raw||'').split(/[\n,;]+/).m
 function refreshWriteBank(){const valid=new Set(getWriteWords());app.banks.selectedWrite=new Set([...app.banks.selectedWrite].filter(word=>valid.has(word)));buildWordBank('writeBank',getWriteWords(),app.banks.selectedWrite)}
 function addCustomWriteWords(){const words=normalizeWordList($('writeCustomWords').value);if(!words.length){showStatus('Skriv inn minst ett ord.','warn');return}state.customWriteWords=words;words.forEach(word=>app.banks.selectedWrite.add(word));persist();refreshWriteBank();showStatus('Egne skriveord er lagret.','ok')}
 function clearCustomWriteWords(){state.customWriteWords=[];$('writeCustomWords').value='';persist();refreshWriteBank();showStatus('Egne skriveord er fjernet.','ok')}
-function randomItemsFromSet(selectedSet,length){const selected=Array.from(selectedSet);if(!selected.length){showStatus('Velg minst ett element.','warn');return null}const safeLength=clamp(Number(length)||120,1,120);const out=[];for(let i=0;i<safeLength;i++)out.push(selected[Math.floor(Math.random()*selected.length)]);return out}
+function pickRandomNoRepeat(selected,lastValue){
+  if(selected.length<=1)return selected[0];
+  let pool=selected.filter(item=>item!==lastValue);
+  if(!pool.length)pool=selected;
+  return pool[Math.floor(Math.random()*pool.length)];
+}
+function randomItemsFromSet(selectedSet,length){
+  const selected=Array.from(selectedSet);
+  if(!selected.length){showStatus('Velg minst ett element.','warn');return null}
+  const safeLength=clamp(Number(length)||120,1,120);
+  const out=[];
+  for(let i=0;i<safeLength;i++)out.push(pickRandomNoRepeat(selected,out[i-1]));
+  return out;
+}
+function noAdjacentDuplicates(list){
+  const arr=[...list];
+  if(arr.length<2)return arr;
+  for(let i=1;i<arr.length;i++){
+    if(arr[i]!==arr[i-1])continue;
+    let swap=-1;
+    for(let j=i+1;j<arr.length;j++){
+      const prevOk=arr[j]!==arr[i-1];
+      const nextOk=(j+1>=arr.length)||arr[i]!==arr[j+1];
+      if(prevOk&&nextOk){swap=j;break}
+    }
+    if(swap!==-1){[arr[i],arr[swap]]=[arr[swap],arr[i]]}
+  }
+  return arr;
+}
 function shuffle(list){const arr=[...list];for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]]}return arr}
 function renderSequence(list,{flash=false}={}){state.prevSeq=list.join('|');persist();resetReadingMarks();setPostRoundBar(false);app.ui.currentTest=null;hideStatus();if(flash)startFlashcards(list);else renderTokens(list)}
 
 function startFlashcards(list){
-  app.flashcards.active=true;app.flashcards.cards=[...list];app.flashcards.readCount=0;app.ui.flashOriginMode=app.ui.mode;resetReadingMarks();
+  app.flashcards.active=true;app.flashcards.cards=noAdjacentDuplicates(list);app.flashcards.readCount=0;app.ui.flashOriginMode=app.ui.mode;resetReadingMarks();
   $('readSharedArea').style.display='block';$('wordDisplay').style.display='none';$('flashcardArea').style.display='block';$('flashcardWord').textContent='klar';$('flashcardProg').textContent=`Kort 0 av ${app.flashcards.cards.length}`;$('flashDrillStartBtn').disabled=false;$('flashNextCardBtn').disabled=true;$('flashcardArea').focus();$('flashcardArea').scrollIntoView({behavior:'smooth',block:'center'});updateCounts();showStatus('Flashcards er klare. Start drill når du vil.','ok')
 }
 function stopFlashcards(resetState=true){$('flashcardArea').style.display='none';$('wordDisplay').style.display='block';$('flashNextCardBtn').disabled=true;if(resetState){app.flashcards.active=false;app.flashcards.cards=[];app.flashcards.readCount=0;app.ui.flashOriginMode=''}}
@@ -536,7 +586,7 @@ function loadTestText(){const key=$('testText').value;const type=$('testType').v
 function setWriteSeconds(sec){app.write.flashSec=clamp(Number(sec)||0,0,20);$('writeCustomSec').value=app.write.flashSec;updateWriteUI()}
 function updateWriteUI(){$('writeSecView').textContent=app.write.flashSec+'s';$('writeCorrect').textContent=app.write.correct;$('writeWrong').textContent=app.write.wrong;$('writeLeft').textContent=Math.max(0,app.write.queue.length-app.write.index);['write1','write3','write5'].forEach(id=>$(id).classList.remove('purple'));if(app.write.flashSec===1)$('write1').classList.add('purple');if(app.write.flashSec===3)$('write3').classList.add('purple');if(app.write.flashSec===5)$('write5').classList.add('purple')}
 function resetWriteStage(){app.write.answered=false;app.write.currentWord='';$('writePrompt').textContent='Velg ord og start økta.';$('writeFlash').textContent='klar';$('writeFlash').classList.remove('hiddenWord');$('writeAnswer').value='';$('writeAnswer').disabled=true;$('checkWriteBtn').disabled=true;$('nextWriteBtn').disabled=true;$('writeFeedback').textContent='';updateWriteUI()}
-function startWriteTraining(){const chosen=[...app.banks.selectedWrite];const len=clamp(+$('writeLen').value||10,1,30);if(!chosen.length){showStatus('Velg minst ett skriveord.','warn');return}app.write.queue=[];app.write.index=0;app.write.correct=0;app.write.wrong=0;for(let i=0;i<len;i++)app.write.queue.push(chosen[Math.floor(Math.random()*chosen.length)]);nextWriteWord()}
+function startWriteTraining(){const chosen=[...app.banks.selectedWrite];const len=clamp(+$('writeLen').value||10,1,30);if(!chosen.length){showStatus('Velg minst ett skriveord.','warn');return}app.write.queue=[];app.write.index=0;app.write.correct=0;app.write.wrong=0;for(let i=0;i<len;i++)app.write.queue.push(pickRandomNoRepeat(chosen,app.write.queue[i-1]));nextWriteWord()}
 function focusWriteAnswerSoon(){setTimeout(()=>$('writeAnswer').focus(),30)}
 function nextWriteWord(){if(app.write.index>=app.write.queue.length){finishWriteTraining();return}app.write.answered=false;app.write.currentWord=app.write.queue[app.write.index];$('writePrompt').textContent=`Ord ${app.write.index+1} av ${app.write.queue.length}`;$('writeFlash').classList.remove('hiddenWord');$('writeFlash').textContent=app.write.currentWord;$('writeAnswer').value='';$('writeAnswer').disabled=true;$('checkWriteBtn').disabled=true;$('nextWriteBtn').disabled=true;$('writeFeedback').textContent='';setTimeout(()=>{$('writeFlash').textContent='•••';$('writeFlash').classList.add('hiddenWord');$('writeAnswer').disabled=false;$('checkWriteBtn').disabled=false;focusWriteAnswerSoon()},app.write.flashSec*1000);updateWriteUI()}
 function logWriteResult(ok){state.rounds.push({ts:Date.now(),timeSec:app.write.flashSec,total:1,errors:ok?0:1,correct:ok?1:0,wpm:0,coins:rewardsOn()&&ok?1:0,lastIdx:0,fpm:(ok||app.write.flashSec<=0)?0:Math.round(60/app.write.flashSec),cpm:(!ok||app.write.flashSec<=0)?0:Math.round(60/app.write.flashSec),mode:`skriving-${app.write.flashSec}s`});state.roundCount=(state.roundCount||0)+1}
